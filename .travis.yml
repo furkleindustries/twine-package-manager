@@ -1,0 +1,15 @@
+sudo: required
+
+language: python
+
+branches:
+  - master
+
+services:
+  - docker
+
+install:
+  - docker build -t server .
+  - docker run -d --name server server
+
+script: docker exec server TODO

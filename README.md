@@ -1,0 +1,1 @@
+Now being rewritten in Django. New README (and significantly reduced structural complexity) coming soon.
