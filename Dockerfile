@@ -8,8 +8,11 @@ ARG TERM=xterm-256color
 # Make the terminal non-interactive.
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Create the directory for the server container.
-RUN mkdir /etc/twine-package-manager-server/
+# Create the directory for the container.
+RUN mkdir /etc/twine-package-manager/
 
 # Set the working directory.
-WORKDIR /etc/twine-package-manager-server/
+WORKDIR /etc/twine-package-manager/
+
+# Copy the contents of the repository to the working directory.
+COPY . .

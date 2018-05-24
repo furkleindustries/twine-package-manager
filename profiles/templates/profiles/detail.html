@@ -1,0 +1,89 @@
+{% if profile %}
+    <article>
+        <h1>
+            Profile
+        </h1>
+
+        <h2>
+            {{ profile.user.username }}
+        </h2>
+
+        {% if profile.email_visible and profile.user.email %}
+            <div>
+                <p>
+                    <em>
+                        E-mail
+                    </em>
+                </p>
+
+                <p>
+                    <a href="mailto:{{ profile.user.email }}">
+                        {{ profile.user.email }}
+                    </a>
+                </p>
+            </div>
+        {% endif %}
+
+        {% if profile.homepage %}
+            <div>
+                <p>
+                    <em>
+                        Homepage
+                    </em>
+                </p>
+
+                <p>
+                    <a href="{{ profile.homepage }}">
+                        {{ profile.trimmed_homepage }}
+                    </a>
+                </p>
+            </div>
+        {% endif %}
+
+        <div>
+            <p>
+                <em>
+                    Date created
+                </em>
+            </p>
+
+            <p>
+                {{ profile.user.date_joined}}
+            </p>
+        </div>
+
+        <div>
+            <p>
+                <em>
+                    Last logged in
+                </em>
+            </p>
+
+            <p>
+                {{ profile.user.last_login }}
+            </p>
+        </div>
+
+        {% if packages %}
+            <div>
+                <p>
+                    <em>
+                        Packages
+                    </em>
+                </p>
+
+                <ul>
+                    {% for package in packages %}
+                        <li>
+                            <a href="/packages/{{ package.id }}/">
+                                {{ package.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </article>
+{% else %}
+    <p>Profile not found.</p>
+{% endif %}

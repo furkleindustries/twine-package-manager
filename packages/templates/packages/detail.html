@@ -1,0 +1,105 @@
+{% if package %}
+    <article>
+        <h1>
+            Package
+        </h1>
+
+        <h2>
+            {{ package.name }}
+        </h2>
+
+        {% if author %}
+            <section>
+                <p>
+                    <em>
+                        Author
+                    </em>
+                </p>
+
+                <p>
+                    <a href="profiles/{{ author.user_id }}">
+                        {{ author.user.username }}
+                    </a>
+                </p>
+            </section>
+        {% endif %}
+
+        {% if owner %}
+            <section>
+                <p>
+                    <em>
+                        Owner
+                    </em>
+                </p>
+
+                <p>
+                    <a href="profiles/{{ owner.user_id}}">
+                        {{ owner.user.username }}
+                    </a>
+                </p>
+            </section>
+        {% endif %}
+
+        {% if package.description %}
+            <section>
+                <p>
+                    <em>
+                        Description
+                    </em>
+                </p>
+
+                <p>
+                    {{ package.description }}
+                </p>
+            </section>
+        {% endif %}
+
+        <section>
+            <p>
+                <em>
+                    Versions
+                </em>
+            </p>
+            
+            {% if versions %}
+                <ul>
+                    {% for version in versions %}
+                        <li>
+                            {% if package.default_version == version %}
+                                <a className="default" href="/versions/{{ version.id }}/">
+                                    {{ version.version_identifier }}
+                                </a>
+                            {% else %}
+                                <a href="/versions/{{ version.id }}/">
+                                    {{ version.version_identifier }}
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>
+                    No versions created.
+                </p>
+            {% endif %}
+        </section>
+
+        
+
+        {% if package.keywords %}
+            <section>
+                <p>
+                    <em>
+                        Keywords
+                    </em>
+                </p>
+
+                <p>
+                    {{ package.keywords }}
+                </p>
+            </section>
+        {% endif %}
+    </article>
+{% else %}
+    <p>Package not found.</p>
+{% endif %}
