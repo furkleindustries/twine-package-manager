@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.views import generic
 
-from profiles.models import Profile
 from packages.models import Package
 from versions.models import Version
 

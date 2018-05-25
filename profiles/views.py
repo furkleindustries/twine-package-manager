@@ -1,21 +1,24 @@
+from django.views import generic
 from django.shortcuts import render
 
 from .models import Profile
 from packages.models import Package
+from versions.models import Version
 
 
-def detail(request, profile_id):
-    profile = None
-    try:
-        profile = Profile.objects.get(user_id=profile_id)
-    except Profile.DoesNotExist:
-        pass
+class IndexView(generic.TemplateView):
+    template_name = 'profiles/index.html'
 
-    packages = Package.objects.filter(owner_id=profile_id)
-    
-    context = {
-        'packages': packages,
-        'profile': profile,
-    }
 
-    return render(request, 'profiles/detail.html', context)
+class DetailView(generic.DetailView):
+    template_name = 'profiles/detail.html'
+    model = Profile
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        profile = data['object']
+        packages = Package.objects.filter(owner=profile.user)
+        return {
+            'packages': packages,
+            'profile': profile,
+        }
