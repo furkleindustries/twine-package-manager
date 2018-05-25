@@ -33,5 +33,7 @@ class Package(models.Model):
     keywords = models.TextField(blank=True, default='')
     tag = models.TextField(blank=True, default='')
 
+    date_created = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return self.name

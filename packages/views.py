@@ -1,36 +1,39 @@
 from django.shortcuts import render
+from django.views import generic
 
 from profiles.models import Profile
+from packages.models import Package
 from versions.models import Version
+
 from .models import Package
 
 
-def detail(request, package_id):
-    package = None
-    try:
-        package = Package.objects.get(id=package_id)
-    except Package.DoesNotExist:
-        pass
+class IndexView(generic.ListView):
+    template_name = 'packages/index.html'
+    context_object_name = 'latest_package_dicts'
 
-    author = None
-    try:
-        author = Profile.objects.get(user_id=package.author)
-    except Profile.DoesNotExist:
-        pass
+    def get_queryset(self):
+        packages = Package.objects.order_by('-date_created')
+        return list(map(lambda x: {
+            'package': x,
+            'author': x.author,
+            'owner': x.owner,
+        }, packages))
 
-    owner = None
-    try:
-        owner = Profile.objects.get(user_id=package.owner)
-    except Profile.DoesNotExist:
-        pass
 
-    versions = Version.objects.filter(parent_package_id=package_id)
+class DetailView(generic.DetailView):
+    template_name = 'packages/detail.html'
+    context_object_name = 'package_dict'
+    model = Package
 
-    context = {
-        'author': author,
-        'owner': owner,
-        'package': package,
-        'versions': versions,
-    }
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        package = data['package_dict']
+        data['package_dict'] = {
+            'author':  package.author,
+            'package': package,
+            'owner': package.owner,
+            'versions': list(Version.objects.filter(parent_package=package))
+        }
 
-    return render(request, 'packages/detail.html', context)
+        return data

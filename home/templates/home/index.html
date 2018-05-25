@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include "meta.html" %}
+        <meta name="description" content="The Twine Package Manager is the package manager for modern hypertext.">
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        <article>
+            <h1>
+                Twine Package Manager
+            </h1>
+        
+            <section>
+                <h2>
+                    Build and use new Twine macros, plugins, and formats
+                </h2>
+        
+                <p>
+                    Twine Package Manager, or TwinePM, is a package manager for
+                    developers who make Twine modules, and for authors who want
+                    to make use of the pre-existing, proven labors of other
+                    community members in order to make their hypertext fiction
+                    and games even better.
+                </p>
+            </section> 
+        
+            <section>
+                <h3>
+                    Sign up for free and start finding and creating new CSS
+                    themes, macros, syntax highlighters, and more.
+                </h3>
+
+                {% include "signup.html" %}
+            </section>
+
+            <section>
+                <h3>
+                    Need Twine first?
+                </h3>
+
+                <p>
+                    Head over to
+                    <a href="//twinery.org">Twinery</a>
+                    to use the online version or download the desktop version.
+                </p>
+
+                <a href="//twinery.org">
+                    Get Twine now
+                </a>
+            </section>
+
+            <section>
+                <h3>
+                    Latest packages
+                </h3>
+
+                {% include "latest_packages.html" with package_links=True %}
+            </section>
+        </article>
+
+        {% include "footer.html" %}
+    </body>
+</html>

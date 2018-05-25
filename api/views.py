@@ -32,7 +32,7 @@ def get_item_not_found_response(_type, _id):
     return response
 
 
-def item_response(item):
+def get_item_response(item):
     response = HttpResponse(
         dumps(model_to_dict(item))
     )
@@ -45,7 +45,7 @@ def packages(request, package_id):
     method = request.method
     if method == 'GET':
         try:
-            return item_response(Package.objects.get(id=package_id))
+            return get_item_response(Package.objects.get(id=package_id))
         except Package.DoesNotExist:
             return get_item_not_found_response('package', package_id)
     elif method == 'POST':
@@ -64,7 +64,7 @@ def profiles(request, profile_id):
     method = request.method
     if method == 'GET':
         try:
-            return item_response(Profile.objects.get(user_id=profile_id))
+            return get_item_response(Profile.objects.get(user_id=profile_id))
         except Profile.DoesNotExist:
             return get_item_not_found_response('profile', profile_id)
     elif method == 'POST':
@@ -83,7 +83,7 @@ def versions(request, version_id):
     method = request.method
     if method == 'GET':
         try:
-            return item_response(Version.objects.get(id=version_id))
+            return get_item_response(Version.objects.get(id=version_id))
         except Version.DoesNotExist:
             return get_item_not_found_response('version', version_id)
     elif method == 'POST':

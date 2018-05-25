@@ -1,0 +1,107 @@
+{% if package_dict %}
+    <div>
+        <h3>
+            {% if package_links %}
+                <a href="/packages/{{ package.id }}">
+                    {{ package_dict.package.name }}
+                </a>
+            {% else %}
+                {{ package_dict.package.name }}
+            {% endif %}
+        </h3>
+
+        {% if package_dict.author %}
+            <div>
+                <h4>
+                    <em>
+                        Author
+                    </em>
+                </h4>
+
+                <p>
+                    <a href="/profiles/{{ author.user_id }}">
+                        {{ package_dict.author.username }}
+                    </a>
+                </p>
+            </div>
+        {% endif %}
+
+        {% if package_dict.owner %}
+            <div>
+                <h4>
+                    <em>
+                        Owner
+                    </em>
+                </h4>
+
+                <p>
+                    <a href="/profiles/{{ owner.user_id}}">
+                        {{ package_dict.owner.username }}
+                    </a>
+                </p>
+            </div>
+        {% endif %}
+
+        {% if package_dict.package.description %}
+            <div>
+                <h4>
+                    <em>
+                        Description
+                    </em>
+                </h4>
+
+                <p>
+                    {{ package.description }}
+                </p>
+            </div>
+        {% endif %}
+
+        {% if package_dict.versions %}
+            <div>
+                <h4>
+                    <em>
+                        Versions
+                    </em>
+                </h4>
+                
+                <ul>
+                    {% for version in package_dict.versions %}
+                        <li>
+                            {% if package_dict.package.default_version == version %}
+                                <a className="default" href="/versions/{{ version.id }}/">
+                                    {{ version.version_identifier }}
+                                </a>
+                            {% else %}
+                                <a href="/versions/{{ version.id }}/">
+                                    {{ version.version_identifier }}
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% elif package_dict.versions is not None %}
+            <div>
+                <p>
+                    No versions created.
+                </p>
+            </div>
+        {% endif %}
+
+        {% if package_dict.package.keywords %}
+            <div>
+                <h4>
+                    <em>
+                        Keywords
+                    </em>
+                </h4>
+
+                <p>
+                    {{ package_dict.package.keywords }}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+{% else %}
+    <p>Package not found.</p>
+{% endif %}

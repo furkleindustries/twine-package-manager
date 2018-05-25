@@ -14,13 +14,14 @@ class Version(models.Model):
     description = models.TextField(blank=True, default='')
     js = models.TextField(blank=True, default='')
     css = models.TextField(blank=True, default='')
-    time_created = models.DateTimeField(auto_now_add=True)
 
     parent_package = models.ForeignKey(
         'packages.Package',
         on_delete=models.CASCADE,
         null=True,
     )
+
+    date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return '%s - %s' % (self.parent_package, self.version_identifier)
