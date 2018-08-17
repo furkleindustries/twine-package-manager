@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views import generic
 
 from packages.models import Package
@@ -9,14 +8,15 @@ from .models import Package
 
 class IndexView(generic.ListView):
     template_name = 'packages/index.html'
-    context_object_name = 'latest_package_dicts'
+    context_object_name = 'package_dicts'
 
     def get_queryset(self):
         packages = Package.objects.order_by('-date_created')
         return list(map(lambda x: {
-            'package': x,
             'author': x.author,
+            'logged_in': self.request.user.is_authenticated,
             'owner': x.owner,
+            'package': x,
         }, packages))
 
 
@@ -30,6 +30,7 @@ class DetailView(generic.DetailView):
         package = data['package_dict']
         data['package_dict'] = {
             'author':  package.author,
+            'logged_in': self.request.user.is_authenticated,
             'package': package,
             'owner': package.owner,
             'versions': list(Version.objects.filter(parent_package=package))

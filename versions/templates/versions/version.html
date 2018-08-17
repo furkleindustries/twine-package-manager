@@ -1,0 +1,77 @@
+{% if version_dict %}
+    <h3>
+        {{ version_dict.version.version_identifier }}
+    </h3>
+
+    {% if version_dict.parent_package %}
+        <h4>
+            A version of the
+            <a href="/packages/{{ version_dict.parent_package.id }}">{{ version_dict.parent_package.name }}</a>
+            package.
+        </h4>
+    {% endif %}
+
+    {% if version_dict.version.description %}
+        <div>
+            <h4>
+                <em>
+                    Description
+                </em>
+            </h4>
+
+            <p>
+                {{ version_dict.version.description }}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if version_dict.version.js %}
+        <div>
+            <h4>
+                <em>
+                    Javascript
+                </em>
+            </h4>
+
+            <p>
+                <code>
+                    {{ version_dict.version.js }}
+                </code>
+            </p>
+        </div>
+    {% endif %}
+
+    {% if version_dict.version.css %}
+        <div>
+            <h4>
+                <em>
+                    CSS
+                </em>
+            </h4>
+
+            <p>
+                <code>
+                    {{ version_dict.version.css }}
+                </code>
+            </p>
+        </div>
+    {% endif %}
+
+    {% if version_dict.version.date_created %}
+        <div>
+            <h4>
+                <em>
+                    Date created
+                </em>
+            </h4>
+
+            <p>
+                <time>
+                    {{ version_dict.version.date_created }}
+                </time>
+            </p>
+        </div>
+    {% endif %}
+{% else %}
+    <p>Version not found.</p>
+{% endif %}

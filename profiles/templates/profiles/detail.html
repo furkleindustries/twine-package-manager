@@ -1,102 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        {% include "meta.html" %}
-    </head>
+{% extends 'base.html' %}
 
-    <body>
-        {% include "header.html" %}
+{% block extraheaders %}
+<title>Twine Package Manager - {{ profile.user.username|default:"Profile" }}</title>
+<meta
+    name="description"
+    content="A detailed view of the profile for {{ profile.user.username|default:'a Twine Package Manager user' }}."
+>
+{% endblock %}
 
-        {% if profile %}
-            <article>
-                <h1>
-                    Profile
-                </h1>
-
-                <h2>
-                    {{ profile.user.username }}
-                </h2>
-
-                {% if profile.email_visible and profile.user.email %}
-                    <div>
-                        <p>
-                            <em>
-                                E-mail
-                            </em>
-                        </p>
-
-                        <p>
-                            <a href="mailto:{{ profile.user.email }}">
-                                {{ profile.user.email }}
-                            </a>
-                        </p>
-                    </div>
-                {% endif %}
-
-                {% if profile.homepage %}
-                    <div>
-                        <p>
-                            <em>
-                                Homepage
-                            </em>
-                        </p>
-
-                        <p>
-                            <a href="{{ profile.homepage }}">
-                                {{ profile.trimmed_homepage }}
-                            </a>
-                        </p>
-                    </div>
-                {% endif %}
-
-                <div>
-                    <p>
-                        <em>
-                            Date created
-                        </em>
-                    </p>
-
-                    <p>
-                        {{ profile.user.date_joined}}
-                    </p>
-                </div>
-
-                <div>
-                    <p>
-                        <em>
-                            Last logged in
-                        </em>
-                    </p>
-
-                    <p>
-                        {{ profile.user.last_login }}
-                    </p>
-                </div>
-
-                {% if packages %}
-                    <div>
-                        <p>
-                            <em>
-                                Packages
-                            </em>
-                        </p>
-
-                        <ul>
-                            {% for package in packages %}
-                                <li>
-                                    <a href="/packages/{{ package.id }}/">
-                                        {{ package.name }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-            </article>
-        {% else %}
-            <p>Profile not found.</p>
-        {% endif %}
-
-        {% include "footer.html" %}
-    </body>
-</html>
+{% block content %}
+    <article>
+        {% with with_labels=True %}
+            {% include "profiles/profile.html" %}
+        {% endwith %}
+    </article>
+{% endblock %}

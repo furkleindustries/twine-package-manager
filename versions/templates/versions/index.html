@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include "meta.html" %}
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        <h1>
+            Versions
+        </h1>
+
+        {% for version_dict in version_dicts %}
+            {% include "versions/version.html" %}
+        {% empty %}
+            <p>
+                No versions created.
+            </p>
+        {% endfor %}
+
+        {% include "footer.html" %}
+    </body>
+</html>

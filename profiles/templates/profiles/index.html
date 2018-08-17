@@ -1,16 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        {% include "meta.html" %}
-    </head>
+{% extends 'base.html' %}
 
-    <body>
-        {% include "header.html" %}
+{% block extraheaders %}
+<title>Twine Package Manager - Profiles</title>
+<meta
+    name="description"
+    content="Explore the profiles of new users and search the database."
+>
+{% endblock %}
 
-        <h1>
-            Profiles
-        </h1>
+{% block content %}
+<article>
+    <h1>
+        Profiles
+    </h1>
 
-        {% include "footer.html" %}
-    </body>
-</html>
+    <ul>
+        {% for profile in profiles %}
+            {% with with_link=True %}
+                {% include "profiles/profile.html" %}
+            {% endwith %}
+        {% empty %}
+            <li>
+                No profiles created.
+            </li>
+        {% endfor %}
+    </ul>
+</article>
+{% endblock %}

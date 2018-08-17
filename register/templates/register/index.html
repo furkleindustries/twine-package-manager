@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Twine Package Manager - Register</title>
+        {% include "meta.html" %}
+        <meta name="description" content="Register an account to start contributing to Twine Package Manager.">
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        <form action="/api/register" method="POST">
+            <label for="username">
+                Username
+            </label>
+
+            <input id="username" name="username">
+
+            <label for="password">
+                Password
+            </label>
+
+            <input id="password" name="password" type="password">
+
+            <label for="email">
+                E-mail
+            </label>
+
+            <input id="email" name="email" type="email">
+        </form>
+
+        {% include "footer.html" %}
+    </body>
+</html>

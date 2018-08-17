@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block extraheaders %}
+<title>Twine Package Manager - Register</title>
+
+<meta
+    name="description"
+    content="Register an account to start contributing to Twine Package Manager."
+>
+{% endblock %}
+
+{% block content %}
+<form id="loginForm" action="/login/" method="POST">
+    {% csrf_token %}
+
+    <label for="username">
+        Username
+    </label>
+
+    <input
+        id="username"
+        class="enterable"
+        name="username"
+        type="text"
+    >
+
+    <label for="password">
+        Password
+    </label>
+
+    <input
+        id="password"
+        class="enterable"
+        name="password"
+        type="password"
+    >
+
+    <input id="submit" name="submit" type="submit">
+
+    {% if form.non_field_errors %}
+        <ul id="errors">
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% include "enterable_inputs.html" %}
+
+    {% include "hide_errors.html" %}
+
+    <script id="focus">
+    (function focus() {
+        var username = document.querySelector('#username');
+        if (username) {
+            username.focus();
+        }
+    })();
+    </script>
+</form>
+{% endblock %}

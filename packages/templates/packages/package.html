@@ -1,8 +1,12 @@
 {% if package_dict %}
+    {% if as_list %}
+    <li>
+    {% else %}
     <div>
+    {% endif %}
         <h3>
             {% if package_links %}
-                <a href="/packages/{{ package.id }}">
+                <a href="/packages/{{ package_dict.package.id }}">
                     {{ package_dict.package.name }}
                 </a>
             {% else %}
@@ -10,16 +14,18 @@
             {% endif %}
         </h3>
 
-        {% if package_dict.author %}
+        {% if package_dict.author and show_author %}
             <div>
-                <h4>
-                    <em>
-                        Author
-                    </em>
-                </h4>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Author
+                        </em>
+                    </h4>
+                {% endif %}
 
                 <p>
-                    <a href="/profiles/{{ author.user_id }}">
+                    <a href="/profiles/{{ package_dict.author.user_id }}">
                         {{ package_dict.author.username }}
                     </a>
                 </p>
@@ -28,14 +34,20 @@
 
         {% if package_dict.owner %}
             <div>
-                <h4>
-                    <em>
-                        Owner
-                    </em>
-                </h4>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Owner
+                        </em>
+                    </h4>
+                {% endif %}
 
                 <p>
-                    <a href="/profiles/{{ owner.user_id}}">
+                    {% if not show_labels %}
+                        By
+                    {% endif %}
+
+                    <a href="/profiles/{{ package_dict.owner.id }}">
                         {{ package_dict.owner.username }}
                     </a>
                 </p>
@@ -44,14 +56,16 @@
 
         {% if package_dict.package.description %}
             <div>
-                <h4>
-                    <em>
-                        Description
-                    </em>
-                </h4>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Description
+                        </em>
+                    </h4>
+                {% endif %}
 
                 <p>
-                    {{ package.description }}
+                    {{ package_dict.package.description }}
                 </p>
             </div>
         {% endif %}
@@ -68,14 +82,12 @@
                     {% for version in package_dict.versions %}
                         <li>
                             {% if package_dict.package.default_version == version %}
-                                <a className="default" href="/versions/{{ version.id }}/">
-                                    {{ version.version_identifier }}
-                                </a>
+                            <a class="default" href="/versions/{{ version.id }}/">
                             {% else %}
-                                <a href="/versions/{{ version.id }}/">
-                                    {{ version.version_identifier }}
-                                </a>
+                            <a href="/versions/{{ version.id }}/">
                             {% endif %}
+                                {{ version.version_identifier }}
+                            </a>
                         </li>
                     {% endfor %}
                 </ul>
@@ -90,18 +102,24 @@
 
         {% if package_dict.package.keywords %}
             <div>
-                <h4>
-                    <em>
-                        Keywords
-                    </em>
-                </h4>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Keywords
+                        </em>
+                    </h4>
+                {% endif %}
 
                 <p>
                     {{ package_dict.package.keywords }}
                 </p>
             </div>
         {% endif %}
+    {% if as_list %}
+    </li>
+    {% else %}
     </div>
+    {% endif %}
 {% else %}
     <p>Package not found.</p>
 {% endif %}

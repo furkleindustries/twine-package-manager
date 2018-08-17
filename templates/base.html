@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include "meta.html" %}
+        <meta name="description" content="Twine Package Manager is the package manager for modern hypertext.">
+        {% block extraheaders %}{% endblock %}
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        {% block content %}{% endblock %}
+
+        {% include "footer.html" %}
+    </body>
+</html>
