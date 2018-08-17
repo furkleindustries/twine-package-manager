@@ -1,13 +1,18 @@
 <header class="Header">
-    <a href="/">
-        Home
-    </a>
+    <a href="/">Home</a>
 
-    <a href="/packages">
-        Packages
-    </a>
+    <a href="/packages">Packages</a>
 
-    <a href="/profiles">
-        Profiles
-    </a>
+    <a href="/profiles">Profiles</a>
+
+    
+    {% if logged_in %}
+        <a href="/account">Account</a>
+
+        <a href="/logout">Logout</a>
+    {% else %}
+        <a href="/register">Register</a>
+
+        <a href="/login">Login</a>
+    {% endif %}
 </header>

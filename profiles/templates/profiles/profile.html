@@ -1,0 +1,123 @@
+{% if profile and user %}
+    <h2>
+        {% if user.username %}
+            {% if with_link and user.id %}
+                <a href="/profiles/{{ user.id }}">
+                    {{ user.username }}
+                </a>
+            {% else %}
+                {{ user.username }}
+            {% endif %}
+        {% else %}
+            No username available.
+        {% endif %}
+    </h2>
+
+    {% if profile.email_visible and user.email %}
+        <div>
+            {% if with_labels %}
+                <h4>
+                    <em>
+                        E-mail
+                    </em>
+                </h4>
+            {% endif %}
+
+            <p>
+                <a href="mailto:{{ user.email }}">
+                    {{ user.email }}
+                </a>
+            </p>
+        </div>
+    {% endif %}
+
+    {% if profile.description %}
+        <div>
+            {% if with_labels %}
+                <h4>
+                    <em>
+                        Description
+                    </em>
+                </h4>
+            {% endif %}
+
+            <p>
+                {{ profile.description }}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if profile.homepage %}
+        <div>
+            {% if with_labels %}
+                <h4>
+                    <em>
+                        Homepage
+                    </em>
+                </h4>
+            {% endif %}
+
+            <p>
+                <a href="{{ profile.homepage }}">
+                    {{ profile.trimmed_homepage }}
+                </a>
+            </p>
+        </div>
+    {% endif %}
+
+    {% if user.date_joined %}
+        <div>
+            {% if with_labels %}
+                <h4>
+                    <em>
+                        Date created
+                    </em>
+                </h4>
+            {% endif %}
+
+            <time>
+                {{ user.date_joined}}
+            </time>
+        </div>
+    {% endif %}
+
+    {% if user.last_login %}
+        <div>
+            {% if with_labels %}
+                <h4>
+                    <em>
+                        Last logged in
+                    </em>
+                </h4>
+            {% endif %}
+
+            <time>
+                {{ user.last_login }}
+            </time>
+        </div>
+    {% endif %}
+
+    {% if packages %}
+        <div>
+            {% if with_labels %}
+                <h4>
+                    <em>
+                        Packages
+                    </em>
+                </h4>
+            {% endif %}
+
+            <ul>
+                {% for package in packages %}
+                    <li>
+                        <a href="/packages/{{ package.id }}/">
+                            {{ package.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% else %}
+    <p>The profile not found, or there was an error.</p>
+{% endif %}

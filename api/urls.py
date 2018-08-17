@@ -1,10 +1,11 @@
-from django.urls import path
+from django.urls import path, re_path
 
-from . import views
+from .views import *
 
 
 urlpatterns = [
-    path('packages/<int:package_id>/', views.packages, name='packages API'),
-    path('profiles/<int:profile_id>/', views.profiles, name='profiles API'),
-    path('versions/<int:version_id>/', views.versions, name='versions API'),
+    path('login/', login_view, name='login API'),
+    re_path(r'^packages/(\d+)?/?$', packages, name='packages API'),
+    re_path(r'^profiles/(\d+)?/?$', profiles, name='profiles API'),
+    re_path(r'^versions/(\d+)?/?$', versions, name='versions API'),
 ]

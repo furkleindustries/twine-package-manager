@@ -30,9 +30,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'account',
+    'api',
     'home',
+    'login',
+    'logout',
     'packages',
     'profiles',
+    'register',
     'versions',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,6 +46,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+LOGIN_URL = '/login/'
+
+LOGIN_REDIRECT_URL = '/'
+
+LOGOUT_REDIRECT_URL = '/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

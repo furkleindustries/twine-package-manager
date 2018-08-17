@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <title>Twine Package Manager - Home</title>
         {% include "meta.html" %}
-        <meta name="description" content="The Twine Package Manager is the package manager for modern hypertext.">
+        <meta name="description" content="Explore new packages and search the database.">
     </head>
 
     <body>
         {% include "header.html" %}
 
         <article>
-            {% include "packages/package_list.html" with package_links=True %}
+            <ul>
+                {% for package_dict in package_dicts %}
+                    {% with package_links=True as_list=True %}
+                        {% include "packages/package.html" %}
+                    {% endwith %}
+                {% empty %}
+                    No packages created.
+                {% endfor %}
+            </ul>
         </article>
 
         {% include "footer.html" %}

@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block extraheaders %}
+<title>Twine Package Manager - Account ({{ user.username|default:"No name" }})</title>
+<meta
+    name="description"
+    content="A detailed view of the account for {{ user.username|default:'a Twine Package Manager user' }}."
+>
+{% endblock %}
+
+{% block content %}
+<article>
+    <h2>
+        {{ user.username|default:"Error: user not found" }}
+    </h2>
+
+    <div>
+        <h4>
+            <em>
+                Date created
+            </em>
+        </h4>
+
+        <time>
+            {% if profile.time_style == '24H' %}
+                {% if profile.date_style == 'DDMM' %}
+                    {{ user.date_joined|date:'d N Y, G:i' }}
+                {% else %}
+                    {{ user.date_joined|date:'N d Y, G:i' }}
+                {% endif %}
+            {% else %}
+                {% if profile.date_style == 'DDMM' %}
+                    {{ user.date_joined|date:'d N Y, g:i a' }}
+                {% else %}
+                    {{ user.date_joined|date:'N d Y, g:i a' }}
+                {% endif %}
+            {% endif %}
+        </time>
+    </div>
+
+    <div>
+        <h4>
+            <em>
+                Last logged in
+            </em>
+        </h4>
+
+        <time>
+            {% if profile.time_style == '24H' %}
+                {% if profile.date_style == 'DDMM' %}
+                    {{ user.last_login|date:'d N Y, G:i' }}
+                {% else %}
+                    {{ user.last_login|date:'N d Y, G:i' }}
+                {% endif %}
+            {% else %}
+                {% if profile.date_style == 'DDMM' %}
+                    {{ user.last_login|date:'d N Y, g:i a' }}
+                {% else %}
+                    {{ user.last_login|date:'N d Y, g:i a' }}
+                {% endif %}
+            {% endif %}
+        </time>
+    </div>
+
+    <form id="profile-update">
+        {% csrf_token %}
+        <div>
+            <label for="email">
+                <em>
+                    E-mail
+                </em>
+            </label>
+
+            <input
+                id="email"
+                name="email"
+                value="{{ user.email }}"
+            >
+        </div>
+
+        <div>
+            <label for="email_visible">
+                <em>
+                    E-mail visible to others
+                </em>
+            </label>
+
+            <select
+                id="email_visible"
+                name="email_visible"
+            >
+                <option selected="{{ profile.email_visible|yesno:'true,false' }}">
+                    True
+                </option>
+
+                <option selected="{{ profile.email_visible|yesno:'false,true' }}">
+                    False
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <label for="homepage">
+                <em>
+                    Homepage
+                </em>
+            </label>
+
+            <input
+                id="homepage"
+                name="homepage"
+                value="{{ profile.homepage }}"
+            >
+        </div>
+
+        <div>
+            <label for="description">
+                <em>
+                    Description
+                </em>
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+            >{{ profile.description }}</textarea>
+        </div>
+
+        <div>
+            <label for="date_style">
+                Date style
+            </label>
+
+            <select
+                id="date_style"
+                name="date_style"
+            >
+                <option{% if profile.date_style == 'DDMM' %} selected{% endif %}>
+                    Day-month-year
+                </option>
+
+                <option{% if profile.date_style == 'MMDD' %} selected{% endif %}>
+                    Month-day-year
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <label for="time_style">
+                Time style
+            </label>
+
+            <select
+                id="time_style"
+                name="time_style"
+            >
+                <option{% if profile.time_style == '12H' %} selected{% endif %}>
+                    12-hour
+                </option>
+
+                <option{% if profile.time_style == '24H' %} selected{% endif %}>
+                    24-hour
+                </option>
+            </select>
+        </div>
+
+        <button id="submit" type="button">
+            Update profile
+        </button>
+
+        <div>
+            <h4>
+                <em>
+                    Packages
+                </em>
+            </h4>
+
+            <ul>
+                {% for package in packages %}
+                    <li>
+                        <a href="/packages/{{ package.id }}/">{{ package.name }}</a>
+
+                        <a href="/packages/delete/{{ package.id }}/">
+                            X
+                        </a>
+                    </li>
+                {% empty %}
+                    No packages yet!
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="/packages/create/">
+            Create new package
+        </a>
+    </form>
+
+    <div id="error"></div>
+
+    <script id="form-putter">
+    (function formPutter(e) {
+        var form = document.querySelector('#profile-update');
+        var submitter = form.querySelector('#submit');
+        var error = document.querySelector('#error');
+        
+        submitter.addEventListener('click', function click() {
+            var csrfTokenInput = form.querySelector('[name=csrfmiddlewaretoken]');
+            var csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
+            var xhr = new XMLHttpRequest();
+            var object = {};
+            
+            new FormData(form).forEach(function each(value, key) {
+                if (key === 'date_style') {
+                    if (value.toLowerCase() === 'day-month-year') {
+                        object[key] = 'DDMM';
+                    } else {
+                        object[key] = 'MMDD';
+                    }
+                } else if (key === 'time_style') {
+                    if (value.toLowerCase() === '24-hour') {
+                        object[key] = '24H';
+                    } else {
+                        object[key] = '12H';
+                    }
+                } else {
+                    object[key] = value;
+                }
+            });
+            
+            xhr.withCredentials = true;
+            xhr.open('PUT', '/api/profiles/{{ user.id }}/');
+            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            xhr.onload = function onload(e) {
+                var errorObj;
+                if (this.status === 200) {
+                    location.reload();
+                } else {
+                    try {
+                        errorObj = JSON.parse(this.responseText);
+                    } catch (e) {}
+
+                    error.textContent = (errorObj || {}).error || 'Unknown error.';
+                    setTimeout(function timeout() {
+                        error.textContent = '';
+                    }, 4000)
+                }
+            };
+    
+            xhr.send(JSON.stringify(object));
+        });
+    })();
+    </script>
+</article>
+{% endblock %}
