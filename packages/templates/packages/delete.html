@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block extraheaders %}
+<title>Twine Package Manager - Delete package ({{ package.name|default:'Error: no name' }})</title>
+
+<meta
+    name="description"
+    content="Delete package {{ package.name }}."
+>
+{% endblock %}
+
+{% block content %}
+<article>
+    <form id="packageDelete">
+        {% csrf_token %}
+
+        <h2>Delete {{ package.name }}?</h2>
+
+        <p>
+            Are you absolutely sure you want to delete this package? Anyone
+            who relies on it for development will be unable to access it on
+            TwinePM ever again with the same name.
+        </p>
+
+        <div>
+            <label for="confirmation">
+                Type the name of the package into the input below.
+            </label>
+
+            <input
+                id="confirmation"
+                name="confirmation"
+            >
+        </div>
+
+        <button id="submit" type="button" disabled>
+            Delete {{ package.name|default:'package' }}
+        </button>
+
+        <div class="error"></div>
+    </form>
+</article>
+
+<script id="deleteConfirmation">
+(function deleteConfirmation() {
+    var input = document.querySelector('#packageDelete #confirmation');
+    var submit = document.querySelector('#packageDelete #submit');
+    if (input && submit) {
+        input.addEventListener('keyup', function keydown() {
+            if (input.value === '{{ package.name }}') {
+                submit.removeAttribute('disabled');
+            }
+        });
+    }
+})();
+</script>
+
+{% include 'form_script.html' %}
+{% endblock %}

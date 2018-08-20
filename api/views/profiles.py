@@ -1,5 +1,6 @@
 from json import loads
 
+from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 
 from profiles.models import Profile
@@ -25,30 +26,36 @@ def profiles(request, user_id):
         if method == 'GET':
             try:
                 profile = Profile.objects.get(user_id=user_id)
-                profile_dict = model_to_dict(profile)
+                user = profile.user
+                profile_dict = {
+                    'username': user.username,
+                    'user_id': user.id,
+                }
+
+                # Respect the user's email visible setting for API requests.
+                if profile.email_visible is True:
+                    profile_dict.update({
+                        'email': user.email,
+                    })
+
+                # Modifies the dict in place, so can't be used as a return val.
+                profile_dict.update(model_to_dict(profile))
+
                 # The profile ID is used nowhere but as a primary key, so
                 # there's really no point in ever exposing it to API consumers.
                 del profile_dict['id']
-                user = profile_dict.get('user')
-                try:
-                    profile_dict['user_id'] = int(user)
-                except (KeyError, ValueError):
-                    profile_dict['user_id'] = 'Invalid ID: %s' % (user)
 
+                # Already covered by the user_id key.
                 del profile_dict['user']
-
-                # Respect the user's email visible setting for API requests.
-                if profile_dict.get('email_visible') is True:
-                    profile_dict['email'] = profile.user.email
 
                 # There's no point in showing this field -- either the e-mail
                 # is visible to API consumers or it's not.
                 del profile_dict['email_visible']
 
-                date_joined = profile.user.date_joined
+                date_joined = user.date_joined
                 profile_dict['date_joined'] = date_joined.timestamp()
 
-                last_login = profile.user.last_login
+                last_login = user.last_login
                 profile_dict['last_login'] = last_login.timestamp()
 
                 return get_item_response(profile_dict)
@@ -75,16 +82,11 @@ def profiles(request, user_id):
             elif profile.user_id != request.user.id:
                 return get_item_not_owned_response('profile', user_id)
 
-            profile_changed = False
-            user_changed = False
-
             if 'description' in put:
                 profile.description = put['description'] or ''
-                profile_changed = True
 
             if 'email' in put:
                 user.email = put['email']
-                user_changed = True
 
             if 'email_visible' in put:
                 try:
@@ -92,11 +94,8 @@ def profiles(request, user_id):
                 except ValueError:
                     profile.email_visible = False
 
-                profile_changed = True
-
             if 'homepage' in put:
                 profile.homepage = put['homepage'] or ''
-                profile_changed = True
 
             if 'date_style' in put:
                 date_style = str(put['date_style'])
@@ -119,18 +118,35 @@ def profiles(request, user_id):
                 profile.time_style = time_style
 
             try:
-                if profile_changed:
-                    profile.full_clean()
-                    profile.save()
+                profile.full_clean()
+                profile.save()
+            except (Exception, ValidationError) as error:
+                if isinstance(error, ValidationError):
+                    return get_update_error_response(
+                        'profile', user.id,
+                        error=dumps(error.messages), status=400)
+                else:
+                    return get_update_error_response(
+                        'package', profile.id)
 
-                if user_changed:
-                    user.full_clean()
-                    user.save()
-            except Exception as error:
-                print(error)
-                return get_update_error('profile', user_id)
-                
-            return get_item_response(profile)
+            try:
+                user.full_clean()
+                user.save()
+            except (Exception, ValidationError) as error:
+                if isinstance(error, ValidationError):
+                    return get_update_error_response(
+                        'profile', user.id,
+                        error=dumps(error.messages), status=400)
+                else:
+                    return get_update_error_response(
+                        'profile', user.id)
+
+            item = model_to_dict(profile)
+            item.update({
+                'email': user.email,
+            })
+
+            return get_item_response(item)
         elif method == 'DELETE':
             user = request.user
             if not user.is_authenticated:
@@ -147,7 +163,7 @@ def profiles(request, user_id):
                 user.delete()
             except Exception as error:
                 print(error)
-                return get_update_error('profile', user_id)
+                return get_update_error_response('profile', user_id)
 
             return get_item_response({
                 'result': 'success',

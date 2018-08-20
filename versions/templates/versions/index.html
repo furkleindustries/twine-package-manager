@@ -1,24 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        {% include "meta.html" %}
-    </head>
+{% extends 'base.html' %}
 
-    <body>
-        {% include "header.html" %}
+{% block extraheaders %}
+<title>Twine Package Manager - Versions</title>
+<meta
+    name="description"
+    content="Explore newly-updated versions of packages and search the database."
+>
+{% endblock %}
 
-        <h1>
-            Versions
-        </h1>
+{% block content %}
+<article>
+    <h1>
+        Versions
+    </h1>
 
-        {% for version_dict in version_dicts %}
+    <ul>
+        {% for version in versions %}
             {% include "versions/version.html" %}
         {% empty %}
-            <p>
+            <li>
                 No versions created.
-            </p>
+            </li>
         {% endfor %}
-
-        {% include "footer.html" %}
-    </body>
-</html>
+    </ul>
+</article>
+{% endblock %}

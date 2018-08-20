@@ -40,7 +40,7 @@
         </section>
     {% endif %}
 
-    <section>
+    <section id="twineMessage">
         <h3>
             Need Twine first?
         </h3>
@@ -49,6 +49,8 @@
             Head over to
             <a href="//twinery.org">Twinery</a>
             to use the online version or download the desktop version.
+            
+            <button id="hideMessage">X</button>
         </p>
     </section>
 
@@ -58,12 +60,36 @@
         </h3>
 
         <ul>
-            {% for package_dict in latest_package_dicts %}
-                {% with package_links=True as_list=True %}
+            {% with as_list=True %}
+                {% for package in latest_packages %}
                     {% include "packages/package.html" %}
-                {% endwith %}
-            {% endfor %}
+                {% endfor %}
+            {% endwith %}
         </ul>
     </section>
 </article>
+
+<script id="hideTwineMessage">
+(function iife() {
+    function hideTwineMessage() {
+        var twineMessage = document.querySelector('#twineMessage');
+        if (twineMessage) {
+            twineMessage.hidden = true;
+            twineMessage.style.display = 'none';
+        }
+    }
+
+    var hideMessage = document.querySelector('#hideMessage');
+    if (hideMessage) {
+        hideMessage.addEventListener('click', function hide() {
+            localStorage.hideTwineMessage = 'true';
+            hideTwineMessage();
+        });
+    }
+
+    if (localStorage && localStorage['hideTwineMessage'] === 'true') {
+        hideTwineMessage();
+    }
+})();
+</script>
 {% endblock %}

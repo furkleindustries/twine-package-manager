@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from re import split
 
 from versions.models import Version
 
@@ -20,7 +21,7 @@ class Package(models.Model):
     )
 
     description = models.TextField(blank=True, default='')
-    homepage = models.TextField(blank=True, default='')
+    homepage = models.URLField(blank=True, default='')
 
     default_version = models.ForeignKey(
         Version,
@@ -35,5 +36,16 @@ class Package(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True)
 
+    downloads = models.IntegerField(default=0)
+
+    def split_keywords(self):
+        return split(r', *', self.keywords)
+
     def __str__(self):
         return self.name
+
+
+class DeletedPackage(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    owner_id = models.IntegerField(null=False)
+    date = models.DateTimeField(auto_now_add=True)

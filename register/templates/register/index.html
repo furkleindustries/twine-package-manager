@@ -1,34 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Twine Package Manager - Register</title>
-        {% include "meta.html" %}
-        <meta name="description" content="Register an account to start contributing to Twine Package Manager.">
-    </head>
+{% extends 'base.html' %}
 
-    <body>
-        {% include "header.html" %}
+{% block extraheaders %}
+<title>Twine Package Manager - Register</title>
 
-        <form action="/api/register" method="POST">
+<meta
+    name="description"
+    content="Register an account to start contributing to Twine Package Manager."
+>
+{% endblock %}
+
+{% block content %}
+    <form action="/register/" method="POST">
+        <div>
             <label for="username">
                 Username
             </label>
 
-            <input id="username" name="username">
+            <input
+                autofocus
+                id="username"
+                name="username"
+            >
+        </div>
 
+        <div>
             <label for="password">
                 Password
             </label>
 
-            <input id="password" name="password" type="password">
+            <input
+                id="password"
+                name="password"
+                type="password"
+            >
+        </div>
 
-            <label for="email">
-                E-mail
-            </label>
+        
+        <label for="email">
+            E-mail
+        </label>
 
-            <input id="email" name="email" type="email">
-        </form>
+        <input
+            id="email"
+            name="email"
+            type="email"
+        >
 
-        {% include "footer.html" %}
-    </body>
-</html>
+        <div class="error"></div>
+    </form>
+
+    {% include 'form_script.html' %}
+
+    <script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></script>
+{% endblock %}

@@ -15,6 +15,8 @@ class Version(models.Model):
     js = models.TextField(blank=True, default='')
     css = models.TextField(blank=True, default='')
 
+    homepage = models.URLField(blank=True, default='')
+
     parent_package = models.ForeignKey(
         'packages.Package',
         on_delete=models.CASCADE,
@@ -24,4 +26,4 @@ class Version(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '%s - %s' % (self.parent_package, self.version_identifier)
+        return '{} - {}'.format(self.parent_package, self.version_identifier)

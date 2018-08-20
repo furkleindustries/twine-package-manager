@@ -15,20 +15,20 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+SECRET_KEY = None
+with open('secrets/django_secret_key') as f:
+    SECRET_KEY = f.read().strip()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 's2g7n=yr0g&a=pnh6&wdq#kea51^++&h5gpi17%ims0%x5dn0m'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# ALLOWED_HOSTS must be specified to run outside of debug mode.
 ALLOWED_HOSTS = []
 
 # Application definition
-
 INSTALLED_APPS = [
     'account',
     'api',
@@ -102,16 +102,16 @@ _prefix = 'django.contrib.auth.password_validation.'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': '%s%s' % (_prefix, 'UserAttributeSimilarityValidator'),
+        'NAME': '{}{}'.format(_prefix, 'UserAttributeSimilarityValidator'),
     },
     {
-        'NAME': '%s%s' % (_prefix, 'MinimumLengthValidator'),
+        'NAME': '{}{}'.format(_prefix, 'MinimumLengthValidator'),
     },
     {
-        'NAME': '%s%s' % (_prefix, 'CommonPasswordValidator'),
+        'NAME': '{}{}'.format(_prefix, 'CommonPasswordValidator'),
     },
     {
-        'NAME': '%s%s' % (_prefix, 'NumericPasswordValidator'),
+        'NAME': '{}{}'.format(_prefix, 'NumericPasswordValidator'),
     },
 ]
 
@@ -132,3 +132,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = ( os.path.join('static'), )

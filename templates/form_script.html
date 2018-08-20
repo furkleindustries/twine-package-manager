@@ -1,0 +1,97 @@
+<script id="form-submission-script" async defer>
+/* The calling form *must* include form_method and form_destination in its
+ * context. */
+(function formPutter(e) {
+    var form = document.querySelector('{{ form_selector|default:"#update" }}');
+    var submitter = form.querySelector('{{ form_submitter|default:"#submit" }}');
+    var error = form.querySelector('{{ form_error|default:".error" }}');
+
+    submitter.addEventListener('click', function click() {
+        var csrfTokenInput = form.querySelector('[name=csrfmiddlewaretoken]');
+        var csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
+        var xhr = new XMLHttpRequest();
+        var payload = {};
+        var namedInputs = Array.prototype.slice.call(
+            form.querySelectorAll('input[name], select[name], textarea[name]'));
+
+        namedInputs.forEach(function each(child) {
+            var tagName = child.tagName.toLowerCase();
+            var name = child.name;
+            var found = false;
+            if (tagName === 'select') {
+                /* Allow options to indicate that they represent a different
+                 * value used on the server side. */
+                Array.prototype.slice.call(child.querySelectorAll('option')).forEach(function each(option) {
+                    if (option.value === child.value && option.dataset.dbValue) {
+                        found = true;
+                        payload[name] = option.dataset.dbValue;
+                    }
+                });
+
+                if (!found) {
+                    payload[name] = child.value;
+                }
+            } else {
+                payload[name] = child.value;
+            }
+        });
+
+        xhr.withCredentials = true;
+        xhr.open('{{ form_method }}', '{{ form_destination }}');
+        xhr.setRequestHeader('X-CSRFToken', csrfToken);
+        xhr.onload = function onload(e) {
+            var responseObj;
+            try {
+                responseObj = JSON.parse(this.responseText);
+            } catch (e) {
+                responseObj = {};
+            }
+
+            if (this.status === 200) {
+                {% if form_after_submit_action == 'update_page' %}
+                    /* Update the form in place, without refreshing. */
+                    Object.keys(responseObj).forEach(function each(key) {
+                        var value = responseObj[key];
+                        var elem = form.querySelector('#' + key);
+                        var tagName = elem ? elem.tagName.toLowerCase() : null;
+                        var found = false;
+                        if (elem) {
+                            if (tagName === 'select') {
+                                Array.prototype.slice.call(elem.querySelectorAll('option')).forEach(function each(option) {
+                                    if (option.dataset.dbValue === String(value)) {
+                                        found = true;
+                                        elem.value = option.value;
+                                    }
+                                });
+
+                                if (!found) {
+                                    elem.value = value;
+                                }
+                            } else {
+                                elem.value = value;
+                            }
+                        }
+                    });
+                {% else %}
+                    /* Redirect back to the account page. */
+                    window.location = '{{ form_after_submit_redirect|default:"/account/" }}';
+                {% endif %}
+            } else {
+                if (error) {
+                    /* Display the server error. */
+                    error.textContent = responseObj.error || 'Unknown error.';
+                    /* Clear the error after a timeout. */
+                    setTimeout(function timeout() {
+                        error.textContent = '';
+                    }, 6000);
+                } else {
+                    console.log('Could not find error element. Error was:');
+                    console.log(responseObj.error);
+                }
+            }
+        };
+
+        xhr.send(JSON.stringify(payload));
+    });
+})();
+</script>
