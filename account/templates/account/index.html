@@ -62,8 +62,9 @@
         </time>
     </div>
 
-    <form id="profile-update">
+    <form id="accountUpdate">
         {% csrf_token %}
+
         <div>
             <label for="email">
                 <em>
@@ -88,12 +89,13 @@
             <select
                 id="email_visible"
                 name="email_visible"
+                value="{{ profile.email_visible }}"
             >
-                <option selected="{{ profile.email_visible|yesno:'true,false' }}">
+                <option data-db-value="true">
                     True
                 </option>
 
-                <option selected="{{ profile.email_visible|yesno:'false,true' }}">
+                <option data-db-value="false">
                     False
                 </option>
             </select>
@@ -134,12 +136,13 @@
             <select
                 id="date_style"
                 name="date_style"
+                value="{% if profile.date_style == 'DDMM' %}Day-month-year{% else %}Month-day-year{% endif %}"
             >
-                <option{% if profile.date_style == 'DDMM' %} selected{% endif %}>
+                <option data-db-value="DDMM">
                     Day-month-year
                 </option>
 
-                <option{% if profile.date_style == 'MMDD' %} selected{% endif %}>
+                <option data-db-value="MMDD">
                     Month-day-year
                 </option>
             </select>
@@ -153,12 +156,13 @@
             <select
                 id="time_style"
                 name="time_style"
+                value="{% if profile.time_style == '24H' %}24-hour{% else %}12H{% endif %}"
             >
-                <option{% if profile.time_style == '12H' %} selected{% endif %}>
+                <option data-db-value="12H">
                     12-hour
                 </option>
 
-                <option{% if profile.time_style == '24H' %} selected{% endif %}>
+                <option data-db-value="24H">
                     24-hour
                 </option>
             </select>
@@ -178,11 +182,17 @@
             <ul>
                 {% for package in packages %}
                     <li>
-                        <a href="/packages/{{ package.id }}/">{{ package.name }}</a>
+                        <strong>{{ package.name }}</strong>
 
-                        <a href="/packages/delete/{{ package.id }}/">
-                            X
-                        </a>
+                        <a
+                            class="editPackage"
+                            href="/packages/{{ package.id }}/edit/"
+                        >Edit</a>
+
+                        <a
+                            class="deletePackage"
+                            href="/packages/{{ package.id }}/delete/"
+                        >Delete</a>
                     </li>
                 {% empty %}
                     No packages yet!
@@ -193,62 +203,16 @@
         <a href="/packages/create/">
             Create new package
         </a>
+
+        <div class="error"></div>
     </form>
 
-    <div id="error"></div>
+    {% include 'form_script.html' %}
 
-    <script id="form-putter">
-    (function formPutter(e) {
-        var form = document.querySelector('#profile-update');
-        var submitter = form.querySelector('#submit');
-        var error = document.querySelector('#error');
-        
-        submitter.addEventListener('click', function click() {
-            var csrfTokenInput = form.querySelector('[name=csrfmiddlewaretoken]');
-            var csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
-            var xhr = new XMLHttpRequest();
-            var object = {};
-            
-            new FormData(form).forEach(function each(value, key) {
-                if (key === 'date_style') {
-                    if (value.toLowerCase() === 'day-month-year') {
-                        object[key] = 'DDMM';
-                    } else {
-                        object[key] = 'MMDD';
-                    }
-                } else if (key === 'time_style') {
-                    if (value.toLowerCase() === '24-hour') {
-                        object[key] = '24H';
-                    } else {
-                        object[key] = '12H';
-                    }
-                } else {
-                    object[key] = value;
-                }
-            });
-            
-            xhr.withCredentials = true;
-            xhr.open('PUT', '/api/profiles/{{ user.id }}/');
-            xhr.setRequestHeader('X-CSRFToken', csrfToken);
-            xhr.onload = function onload(e) {
-                var errorObj;
-                if (this.status === 200) {
-                    location.reload();
-                } else {
-                    try {
-                        errorObj = JSON.parse(this.responseText);
-                    } catch (e) {}
-
-                    error.textContent = (errorObj || {}).error || 'Unknown error.';
-                    setTimeout(function timeout() {
-                        error.textContent = '';
-                    }, 4000)
-                }
-            };
-    
-            xhr.send(JSON.stringify(object));
-        });
-    })();
-    </script>
+    <div>
+        <a href="/account/changePassword/">Change password</a>
+    </div>
 </article>
+
+<script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></Script>
 {% endblock %}

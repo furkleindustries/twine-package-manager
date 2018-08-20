@@ -1,17 +1,17 @@
-{% if version_dict %}
+{% if version %}
     <h3>
-        {{ version_dict.version.version_identifier }}
+        {{ version.version_identifier }}
     </h3>
 
-    {% if version_dict.parent_package %}
+    {% if version.parent_package %}
         <h4>
             A version of the
-            <a href="/packages/{{ version_dict.parent_package.id }}">{{ version_dict.parent_package.name }}</a>
+            <a href="/packages/{{ version.parent_package.id }}">{{ version.parent_package.name }}</a>
             package.
         </h4>
     {% endif %}
 
-    {% if version_dict.version.description %}
+    {% if version.description %}
         <div>
             <h4>
                 <em>
@@ -20,12 +20,12 @@
             </h4>
 
             <p>
-                {{ version_dict.version.description }}
+                {{ version.description }}
             </p>
         </div>
     {% endif %}
 
-    {% if version_dict.version.js %}
+    {% if version.js %}
         <div>
             <h4>
                 <em>
@@ -35,13 +35,13 @@
 
             <p>
                 <code>
-                    {{ version_dict.version.js }}
+                    {{ version.js }}
                 </code>
             </p>
         </div>
     {% endif %}
 
-    {% if version_dict.version.css %}
+    {% if version.css %}
         <div>
             <h4>
                 <em>
@@ -51,13 +51,13 @@
 
             <p>
                 <code>
-                    {{ version_dict.version.css }}
+                    {{ version.css }}
                 </code>
             </p>
         </div>
     {% endif %}
 
-    {% if version_dict.version.date_created %}
+    {% if version.date_created %}
         <div>
             <h4>
                 <em>
@@ -67,7 +67,7 @@
 
             <p>
                 <time>
-                    {{ version_dict.version.date_created }}
+                    {{ version.date_created }}
                 </time>
             </p>
         </div>

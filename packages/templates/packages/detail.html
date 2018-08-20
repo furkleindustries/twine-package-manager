@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block extraheaders %}
-<title>Twine Package Manager - {% if package_dict.package.name %}{{ package_dict.package.name }}{% else %}Package{% endif %}</title>
+<title>Twine Package Manager - Package ({{ package_dict.package.name|default:'Error: no name' }})</title>
 <meta
     name="description"
     content="{% if package_dict.package.description %}{{ package_dict.package.description }}{% else %}A detailed view of {% if package_dict.package.name %}the {{ package_dict.package.name}}{% else %}a Twine{% endif %} package.{% endif %}"
@@ -10,7 +10,7 @@
 
 {% block content %}
 <article>
-    {% with show_author=True show_labels=True %}
+    {% with show_author=True show_labels=True show_downloads=True %}
         {% include "packages/package.html" %}
     {% endwith %}
 </article>

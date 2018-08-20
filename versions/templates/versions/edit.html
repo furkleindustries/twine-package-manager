@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block extraheaders %}
+<title>Twine Package Manager - Create new version for package ({{ package.name|default:'Error: no name' }})</title>
+<meta
+    name="description"
+    content="Create new version for {% if package.name %}{{ package.name }}{% else %} a package.{% endif %}"
+>
+{% endblock %}
+
+{% block content %}
+<article>
+    <form id="versionUpdate">
+        {% csrf_token %}
+
+        <h3>
+            Create new version for {{ package.name|default:'Error: no name' }}
+        </h3>
+
+        <p>
+            Note: you will not be able to alter this version after it is
+            created. Versions are immutable, and if you want to make changes to
+            the package, you will have to create a new version. This is
+            intended to make it so that authors can rely on a certain version
+            of a package always functioning identically.
+        </p>
+
+        <input
+            hidden
+            name="package_id"
+            value="{{ package.id }}"
+        >
+
+        <div>
+            <label for="version_identifier">
+                Version identifier (must be package-unique)
+            </label>
+
+            <input
+                id="version_identifier"
+                name="version_identifier"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="description">
+                <em>
+                    Description
+                </em>
+            </label>
+
+            <input
+                id="description"
+                name="description"
+                required
+                value="{{ version.description }}"
+            >
+        </div>
+
+        <div>
+            <label for="homepage">
+                Package homepage
+            </label>
+
+            <input
+                id="homepage"
+                name="homepage"
+                value="{{ version.homepage }}"
+            >
+        </div>
+
+        <div>
+            <label for="js">
+                <em>
+                    JavaScript (cannot be changed after version creation)
+                </em>
+            </label>
+            
+            <textarea disabled>{{ version.js }}</textarea>
+        </div>
+
+        <div>
+            <label for="css">
+                CSS cannot be changed after version creation)
+            </label>
+
+            <textarea disabled>{{ version.css }}</textarea>
+        </div>
+
+        <button id="submit" type="button">
+            Update version
+        </button>
+        
+        <div class="error"></div>
+    </form>
+</article>
+
+{% include 'form_script.html' %}
+
+<script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></script>
+
+<script src="/static/scripts/triangleMenuHider.js" async defer></script>
+{% endblock %}

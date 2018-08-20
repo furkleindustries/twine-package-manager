@@ -16,9 +16,7 @@
 
     <ul>
         {% for profile in profiles %}
-            {% with with_link=True %}
-                {% include "profiles/profile.html" %}
-            {% endwith %}
+            {% include "profiles/profile.html" %}
         {% empty %}
             <li>
                 No profiles created.

@@ -11,7 +11,7 @@ def trim_profile(profile: Profile):
     trimmed_description = profile.description[0:140].strip()
     return {
         # Only include 140 characters of description.
-        'description': '%s%s' % (trimmed_description, '...'),
+        'description': '{}{}'.format(trimmed_description, '...'),
         'user': {
             'username': profile.user.username,
         },
@@ -25,9 +25,15 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         temp = list(Profile.objects.all())
-        temp.sort(key=lambda x: x.user.date_joined, reverse=True)
+        temp.sort(key=lambda profile: profile.user.date_joined, reverse=True)
         trimmed = list(map(trim_profile, temp))
         return trimmed
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_in'] = self.request.user.is_authenticated
+        context['with_links'] = True
+        return context
 
 
 class DetailView(generic.DetailView):
@@ -36,9 +42,11 @@ class DetailView(generic.DetailView):
     context_object_name = 'user'
 
     def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         user = context.get('user')
         context['logged_in'] = user.is_authenticated
         context['packages'] = Package.objects.filter(owner_id=user.id)
         context['profile'] = user.profile
+        context['with_labels'] = True
+        context['with_dates'] = True
         return context

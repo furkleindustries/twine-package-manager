@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block extraheaders %}
+<title>Twine Package Manager - Package ({{ package.name|default:'Error: no name' }})</title>
+<meta
+    name="description"
+    content="{% if package.package.description %}{{ package.package.description }}{% else %}A detailed view of {% if package.package.name %}the {{ package.package.name}}{% else %}a Twine{% endif %} package.{% endif %}"
+>
+{% endblock %}
+
+{% block content %}
+<article>
+    <form id="packageCreate">
+        {% csrf_token %}
+
+        <div>
+            <label for="name">
+                <em>
+                    Name
+                </em>
+            </label>
+
+            <input
+                id="name"
+                name="name"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="description">
+                <em>
+                    Description
+                </em>
+            </label>
+
+            <input
+                id="description"
+                name="description"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="homepage">
+                <em>
+                    Homepage
+                </em>
+            </label>
+
+            <input
+                id="homepage"
+                name="homepage"
+            >
+        </div>
+
+        <div>
+            <label for="keywords">
+                <em>
+                    Keywords
+                </em>
+            </label>
+
+            <input
+                id="keywords"
+                name="keywords"
+            >
+        </div>
+
+        <button id="submit" type="button">
+            Create package
+        </button>
+
+        <div class="error"></div>
+    </form>
+</article>
+
+{% include 'form_script.html' %}
+{% endblock %}

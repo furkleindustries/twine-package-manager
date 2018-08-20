@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block extraheaders %}
+<title>Twine Package Manager - Package ({{ package.name|default:'Error: no name' }})</title>
+<meta
+    name="description"
+    content="{% if package.package.description %}{{ package.package.description }}{% else %}A detailed view of {% if package.package.name %}the {{ package.package.name}}{% else %}a Twine{% endif %} package.{% endif %}"
+>
+<link
+    rel="stylesheet"
+    href="/static/styles/packages/edit.css"
+    type="text/css"
+>
+{% endblock %}
+
+{% block content %}
+<article>
+    <form id="packageUpdate">
+        {% csrf_token %}
+
+        <h3>
+            {{ package.name }}
+        </h3>
+
+        <div>
+            <label for="description">
+                <em>
+                    Description
+                </em>
+            </label>
+
+            <input
+                id="description"
+                name="description"
+                value="{{ package.description }}"
+            >
+        </div>
+
+        <div>
+            <label for="homepage">
+                Package homepage
+            </label>
+
+            <input
+                id="homepage"
+                name="homepage"
+                value="{{ package.homepage }}"
+            >
+        </div>
+
+        <div>
+            <label for="keywords">
+                <em>
+                    Keywords
+                </em>
+            </label>
+
+            <input
+                id="keywords"
+                name="keywords"
+                value="{{ package.keywords }}"
+            >
+        </div>
+
+        {% if versions %}
+        <div>
+            <label for="default_version">
+                <em>
+                    Default version
+                </em>
+            </label>
+
+            <select
+                id="default_version"
+                name="default_version"
+            >
+                {% for version in versions %}
+                    <option{% if package.default_version == version %} selected{% endif %}>
+                        {{ version.version_identifier }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <label>
+            <em>
+                Versions
+            </em>
+        </label>
+
+        {{ package.default_version.version_identifier }}
+
+        {% if versions %}
+            <div>  
+                <ul>
+                    {% for version in versions %}
+                        <li class="version">
+                            <strong
+                                class="versionIdentifier {% if package.default_version == version %} default{% endif %}"
+                                href="/versions/{{ version.id }}/"
+                                data-version-identifier="{{ version.version_identifier }}"
+                            >
+                                {{ version.version_identifier }}
+                            </strong>
+
+                            <a href="/versions/{{ version.id }}/edit/">Edit</a>
+
+                            <a href="/versions/{{ version.id }}/delete/">Delete</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% elif versions is not None %}
+            <div>
+                <p>
+                    No versions created.
+                </p>
+            </div>
+        {% endif %}
+    
+        <div>
+            <a href="/packages/{{ package.id }}/create_version/">Create new version</a>
+        </div>
+
+        <div>
+            <label for="tag">
+                Tag (to be used as you please)
+            </label>
+
+            <input
+                id="tag"
+                name="tag"
+                value="{{ package.tag }}"
+            >
+        </div>
+
+        <button id="submit" type="button">
+            Update package
+        </button>
+    </form>
+
+    <div>
+        <a href="/packages/{{ package.id }}/delete/">
+            Delete package
+        </a>
+    </div>
+
+    <div class="error"></div>
+</article>
+
+<script src="/static/scripts/packages/defaultVersionSelector.js" async defer></script>
+
+<Script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></Script>
+
+{% include 'form_script.html' %}
+{% endblock %}

@@ -1,8 +1,15 @@
-<script id="hideErrors">
+<script id="hideErrors" async defer>
 setTimeout(function hideErrors() {
     var errors = document.querySelector('#errors');
+    var errorList = document.querySelector('.errorlist');
     if (errors) {
         errors.hidden = true;
+        errors.style.display = 'none';
     }
-}, 8000)
+
+    if (errorList) {
+        errorList.hidden = true;
+        errorList.style.display = 'none';
+    }
+}, {{ hide_errors_timeout_duration|default:8000 }})
 </script>

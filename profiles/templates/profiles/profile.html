@@ -1,7 +1,7 @@
 {% if profile and user %}
     <h2>
         {% if user.username %}
-            {% if with_link and user.id %}
+            {% if with_links and user.id %}
                 <a href="/profiles/{{ user.id }}">
                     {{ user.username }}
                 </a>
@@ -24,9 +24,15 @@
             {% endif %}
 
             <p>
-                <a href="mailto:{{ user.email }}">
-                    {{ user.email }}
-                </a>
+                {% if with_links %}
+                    <a href="mailto:{{ user.email }}">
+                        {{ user.email }}
+                    </a>
+                {% else %}
+                    <span>
+                        {{ user.email }}
+                    </span>
+                {% endif %}
             </p>
         </div>
     {% endif %}
@@ -65,36 +71,38 @@
         </div>
     {% endif %}
 
-    {% if user.date_joined %}
-        <div>
-            {% if with_labels %}
-                <h4>
-                    <em>
-                        Date created
-                    </em>
-                </h4>
-            {% endif %}
+    {% if with_dates %}
+        {% if user.date_joined %}
+            <div>
+                {% if with_labels %}
+                    <h4>
+                        <em>
+                            Date created
+                        </em>
+                    </h4>
+                {% endif %}
 
-            <time>
-                {{ user.date_joined}}
-            </time>
-        </div>
-    {% endif %}
+                <time>
+                    {{ user.date_joined}}
+                </time>
+            </div>
+        {% endif %}
 
-    {% if user.last_login %}
-        <div>
-            {% if with_labels %}
-                <h4>
-                    <em>
-                        Last logged in
-                    </em>
-                </h4>
-            {% endif %}
+        {% if user.last_login %}
+            <div>
+                {% if with_labels %}
+                    <h4>
+                        <em>
+                            Last logged in
+                        </em>
+                    </h4>
+                {% endif %}
 
-            <time>
-                {{ user.last_login }}
-            </time>
-        </div>
+                <time>
+                    {{ user.last_login }}
+                </time>
+            </div>
+        {% endif %}
     {% endif %}
 
     {% if packages %}

@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Twine Package Manager - {{ version_dict.parent_package.name|default:'Unknown package' }} {{ version_dict.version.version_identifier|default:'Unknown version' }}</title>
-        {% include "meta.html" %}
-        <meta name="description" content="Explore new versions of pre-existing packages and search the database.">
-    </head>
+{% extends 'base.html' %}
 
-    <body>
-        {% include "header.html" %}
+{% block extraheaders %}
+<title>Twine Package Manager - {{ version_dict.parent_package.name|default:'Unknown package' }} {{ version_dict.version.version_identifier|default:'Unknown version' }}</title>
+<meta name="description" content="{{ version.description|default:'Explore new versions of pre-existing packages and search the database.' }}">
+{% endblock %}
 
-        <article>
-            {% include "versions/version.html" %}
-        </article>
-                
-        {% include "footer.html" %}
-    </body>
-</html>
+{% block content %}
+<article>
+    {% include "versions/version.html" %}
+</article>
+{% endblock %}
