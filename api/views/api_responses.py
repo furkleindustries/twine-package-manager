@@ -49,9 +49,8 @@ def get_id_not_provided_response(_type, method):
 def get_id_invalid_response(_type, _id):
     response = HttpResponse(
         dumps({
-            'error': 'The id provided, ' +
-                     '{}, when accessing a {} was not valid.'.format(_type,
-                                                                     _id)
+            'error': 'The id provided when accessing a {}, '.format(_type) +
+                     '{}, was not valid.'.format(_id)
         }),
         status=400,
     )

@@ -8,10 +8,13 @@ from .models import Profile
 
 
 def trim_profile(profile: Profile):
+    # Only include 140 characters of description.
     trimmed_description = profile.description[0:140].strip()
+    if len(trimmed_description) == 140:
+        trimmed_description = '{}{}'.format(trimmed_description, '...')
+
     return {
-        # Only include 140 characters of description.
-        'description': '{}{}'.format(trimmed_description, '...'),
+        'description': trimmed_description,
         'user': {
             'username': profile.user.username,
         },

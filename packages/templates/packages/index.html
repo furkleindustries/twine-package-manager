@@ -11,7 +11,7 @@
 {% block content %}
     <article>
         <ul>
-            {% for package_dict in package_dicts %}
+            {% for package in packages %}
                 {% with package_links=True as_list=True %}
                     {% include "packages/package.html" %}
                 {% endwith %}

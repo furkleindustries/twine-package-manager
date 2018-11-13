@@ -17,7 +17,7 @@
         submitter.addEventListener('click', function submit(e) {
             window.onbeforeunload = function noop() {
                 /* In some cases, deleting or setting to null the
-                 * onbeforeunload property does not preven the function from
+                 * onbeforeunload property does not prevent the function from
                  * firing. This, however, replaces it with a no-op. */
             };
         });
@@ -27,7 +27,7 @@
         var retVal = 'You have made modifications, but they have not been ' +
                      'saved to the database, and will be lost if you ' +
                      'navigate away from the page.';
-        e.returnValue = retVal
+        e.returnValue = retVal;
         return retVal;
     }
 })();

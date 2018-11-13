@@ -6,10 +6,10 @@
             hider.addEventListener('click', function click() {
                 if (hideable.classList.contains('hidden')) {
                     hideable.classList.remove('hidden');
-                    hider.textContext = '▼';   
+                    hider.textContent = '▼';   
                 } else {
                     hideable.classList.add('hidden');
-                    hider.textContext = '◀';
+                    hider.textContent = '▶';
                 }
             });
         }

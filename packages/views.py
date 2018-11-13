@@ -9,15 +9,11 @@ from .models import Package
 
 class IndexView(generic.ListView):
     template_name = 'packages/index.html'
-    context_object_name = 'package_dicts'
+    context_object_name = 'packages'
 
     def get_queryset(self):
         packages = Package.objects.order_by('-date_created')
-        return list(map(lambda x: {
-            'author': x.author,
-            'owner': x.owner,
-            'package': x,
-        }, packages))
+        return packages
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -33,12 +29,17 @@ class DetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = context['package']
+        versions = list(Version.objects.filter(parent_package=package))
+        default_version = None
+        for version in versions:
+            if version == package.default_version:
+                default_version = version
+
         context.update({
-            'author':  package.author,
             'logged_in': self.request.user.is_authenticated,
             'package': package,
-            'owner': package.owner,
-            'versions': list(Version.objects.filter(parent_package=package))
+            'default_version': default_version,
+            'versions': versions,
         })
 
         return context
@@ -54,12 +55,15 @@ class UpdateView(LoginRequiredMixin, generic.DetailView):
         package = context['package']
         versions = Version.objects.filter(parent_package=package)
         versions = versions.order_by('-date_created')
-        context['form_after_submit_action'] = 'update_page'
-        context['form_destination'] = '/api/packages/{}/'.format(package.id)
-        context['form_method'] = 'PUT'
-        context['form_selector'] = '#packageUpdate'
-        context['logged_in'] = True
-        context['versions'] = versions
+        context.update({
+            'form_after_submit_action': 'update_page',
+            'form_destination': '/api/packages/{}/'.format(package.id),
+            'form_method': 'PUT',
+            'form_selector': '#packageUpdate',
+            'logged_in': True,
+            'versions': versions,
+        })
+
         return context
 
 
@@ -84,11 +88,14 @@ class DeleteView(LoginRequiredMixin, generic.DeleteView):
         context = super().get_context_data(**kwargs)
         package = context['package']
         versions = list(Version.objects.filter(parent_package=package))
-        context['form_destination'] = '/api/packages/{}/'.format(package.id)
-        context['form_method'] = 'DELETE'
-        context['form_selector'] = '#packageDelete'
-        context['logged_in'] = True
-        context['versions'] = versions
+        context.update({
+            'form_destination': '/api/packages/{}/'.format(package.id),
+            'form_method': 'DELETE',
+            'form_selector': '#packageDelete',
+            'logged_in': True,
+            'versions': versions,
+        })
+
         return context
 
 
@@ -100,11 +107,21 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
         context = super().get_context_data(**kwargs)
         package_id = self.kwargs['pk']
         package = Package.objects.get(id=package_id)
-        context['package'] = package
         versions = list(Version.objects.filter(parent_package=package))
-        context['form_destination'] = '/api/versions/'
-        context['form_method'] = 'POST'
-        context['form_selector'] = '#versionCreate'
-        context['logged_in'] = True
-        context['existing_versions'] = versions
+        versions.sort(
+            # Sort them as lists of major-minor-patch versions, in (hopefully)
+            # valid semver order.
+            key=lambda x: list(map(int, x.version_identifier.split('.'))),
+            reverse=True,
+        )
+
+        context.update({
+            'package': package,
+            'form_destination': '/api/versions/',
+            'form_method': 'POST',
+            'form_selector': '#versionCreate',
+            'logged_in': True,
+            'existing_versions': versions,
+        })
+
         return context

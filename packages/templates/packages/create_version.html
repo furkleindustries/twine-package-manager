@@ -4,7 +4,7 @@
 <title>Twine Package Manager - Create new version for package ({{ package.name|default:'Error: no name' }})</title>
 <meta
     name="description"
-    content="Create new version for {% if package.name %}{{ package.name }}{% else %} a package.{% endif %}"
+    content="Create new version for {{ package.name|default:'a package' }}."
 >
 {% endblock %}
 
@@ -33,7 +33,9 @@
 
         <div>
             <label for="version_identifier">
-                Version identifier (must be package-unique)
+                <em>
+                    Version identifier (must be package-unique)
+                </em>
             </label>
 
             <input
@@ -42,6 +44,35 @@
                 required
             >
         </div>
+
+        {% if existing_versions is not None %}
+            <div>
+                {% if existing_versions %}
+                    <button class="hider" type="button">▶</button>
+                {% endif %}                
+
+                <label>
+                    <em>
+                        Existing versions for this package
+                    </em>
+                </label>
+
+                <div>
+                    <ul class="hideable hidden">
+                        {% for version in existing_versions %}
+                            <li>
+                                {{ version.version_identifier }}
+                            </li>
+                        {% empty %}
+                            <p>
+                                No versions created.
+                            </p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
 
         <div>
             <label for="description">
@@ -59,7 +90,9 @@
 
         <div>
             <label for="homepage">
-                Package homepage
+                <em>
+                    Package homepage
+                </em>
             </label>
 
             <input
@@ -74,7 +107,7 @@
                     JavaScript
                 </em>
             </label>
-            
+
             <textarea
                 id="js"
                 name="js"
@@ -83,7 +116,9 @@
 
         <div>
             <label for="css">
-                CSS
+                <em>
+                    CSS
+                </em>
             </label>
 
             <textarea
@@ -93,34 +128,6 @@
         </div>
 
         
-        {% if existing_versions is not None %}
-            <div>
-                {% if existing_versions %}
-                    <button className="hider" type="button">◀</button>
-                {% endif %}                
-
-                <label>
-                    <em>
-                        Existing versions for this package
-                    </em>
-                </h4>
-
-                <div>
-                    <ul className="hideable hidden">
-                        {% for version in existing_versions %}
-                            <li>
-                                {{ version.version_identifier }}
-                            </li>
-                        {% empty %}
-                            <p>
-                                No versions created.
-                            </p>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        {% endif %}
-
         <button id="submit" type="button">
             Create version
         </button>
@@ -131,7 +138,7 @@
 
 {% include 'form_script.html' %}
 
-<script src="/static//scripts/editOnBeforeUnloadHandler.js" async defer></script>
+<script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></script>
 
 <script src="/static/scripts/triangleMenuHider.js" async defer></script>
 {% endblock %}
