@@ -78,23 +78,41 @@ def packages(request, package_id):
             return get_id_not_provided_response('package', method)
 
         if method == 'GET':
-            package = None
+            to_return = None
             try:
                 # Retrieve the package.
-                package = Package.objects.get(id=package_id)
+                if package_id == '*':
+                    cursor = request.GET.get('cursor') or None
+                    if cursor:
+                        cursor = int(cursor)
+
+                    quantity = request.GET.get('quantity') or None
+                    if quantity:
+                        quantity = int(quantity)
+
+                    temp = Package.objects.all().order_by('-id')
+                    if cursor is not None:
+                        temp = temp.filter(id__gte=cursor)
+
+                    if quantity is not None:
+                        temp = temp[0:quantity]
+                        
+                    to_return = list(temp)
+                else:
+                    to_return = Package.objects.get(id=package_id)
+
+                    # Increment the download count.
+                    package.downloads += 1
+                    try:
+                        package.full_clean()
+                        package.save()
+                    except Exception as error:
+                        print(error)
             except Package.DoesNotExist:
                 return get_item_not_found_response('package', package_id)
 
-            # Increment the download count.
-            package.downloads += 1
-            try:
-                package.full_clean()
-                package.save()
-            except Exception as error:
-                print(error)
-
             # Send it to the client.
-            return get_item_response(package)
+            return get_item_response(to_return)
         elif method == 'PUT':
             user = request.user
             put = loads(request.body)

@@ -226,6 +226,8 @@ def get_item_response(item):
     final_form = None
     if isinstance(item, dict):
         final_form = dumps(item)
+    elif isinstance(item, list):
+        final_form = dumps(list(map(lambda x: model_to_dict(x), item)))
     else:
         final_form = dumps(model_to_dict(item))
 
