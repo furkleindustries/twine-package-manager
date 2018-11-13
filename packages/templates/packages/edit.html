@@ -75,7 +75,7 @@
                 name="default_version"
             >
                 {% for version in versions %}
-                    <option{% if package.default_version == version %} selected{% endif %}>
+                    <option {% if package.default_version == version %}selected{% endif %}>
                         {{ version.version_identifier }}
                     </option>
                 {% endfor %}
@@ -151,7 +151,7 @@
 
 <script src="/static/scripts/packages/defaultVersionSelector.js" async defer></script>
 
-<Script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></Script>
+<script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></script>
 
 {% include 'form_script.html' %}
 {% endblock %}

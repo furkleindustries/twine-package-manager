@@ -29,7 +29,19 @@
         </p>
     </section> 
 
-    {% if not logged_in %}
+    {% if logged_in %}
+        <section>
+            <h3>
+                Create a new package
+            </h3>
+
+            <p>
+                Got a cool idea? Made something useful or pretty for one of your
+                stories? <a href="/packages/create/">Add something new</a> to
+                the TwinePM ecosystem.
+            </p>
+        </section>
+    {% else %}
         <section>
             <h3>
                 Sign up for free and start finding and creating new CSS

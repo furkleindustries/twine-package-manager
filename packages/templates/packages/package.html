@@ -86,7 +86,7 @@
             </div>
         {% endif %}
 
-        {% if package.versions %}
+        {% if versions %}
             <div>
                 <h4>
                     <em>
@@ -94,21 +94,33 @@
                     </em>
                 </h4>
                 
+                <a href="/packages/{{ package.id }}/create_version/">
+                    Create new version
+                </a>
+
                 <ul>
-                    {% for version in package.versions %}
+                    {% if default_version %}
                         <li>
-                            {% if package.default_version == version %}
-                            <a class="default" href="/versions/{{ version.id }}/">
-                            {% else %}
-                            <a href="/versions/{{ version.id }}/">
-                            {% endif %}
-                                {{ version.version_identifier }}
+                            <a href="/versions{{ default_version.id }}/">
+                                <strong>
+                                    {{ default_version.version_identifier }}
+                                </strong>
                             </a>
                         </li>
+                    {% endif %}
+
+                    {% for version in versions %}
+                        {% if version != default_version %}
+                            <li>
+                                <a href="/versions/{{ version.id }}/">
+                                    {{ version.version_identifier }}
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
             </div>
-        {% elif package.versions is not None %}
+        {% elif versions is not None %}
             <div>
                 <p>
                     No versions created.
