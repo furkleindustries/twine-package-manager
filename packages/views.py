@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from packages.models import Package
+from packages.search import packages_search_filter
 from versions.models import Version
 
 from .models import Package
@@ -30,16 +31,7 @@ class SearchView(generic.ListView):
         if search == '*':
             return packages
 
-        search = search.replace(',', '').replace('.', '')
-
-        # Get results that contain the search in the name.
-        packages = packages.filter(name__icontains=search).union(
-                   # Add results that contain the search in the
-                   # description.
-                   packages.filter(description__icontains=search),
-                   # Add results that contain the search in the keywords.
-                   packages.filter(keywords__icontains=search))
-
+        packages = packages_search_filter(search, packages)
         return packages
 
     def get_context_data(self, **kwargs):

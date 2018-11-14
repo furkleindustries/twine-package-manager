@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import Error as DatabaseError
 from django.forms.models import model_to_dict
 
+from packages.search import packages_search_filter
 from packages.models import Package, DeletedPackage
 from versions.models import Version
 
@@ -94,14 +95,7 @@ def packages(request, package_id):
 
                 search = request.GET.get('search') or None
                 if search:
-                    search = search.replace(',', '').replace('.', '')
-                    # Get results that contain the search in the name.
-                    models = models.filter(name__icontains=search).union(
-                        # Add results that contain the search in the
-                        # description.
-                        models.filter(description__icontains=search),
-                        # Add results that contain the search in the keywords.
-                        models.filter(keywords__icontains=search))
+                    models = packages_search_filter(search, models)
 
                 if cursor is not None:
                     models = models.filter(id__gte=cursor)
@@ -115,8 +109,8 @@ def packages(request, package_id):
                 for package in models:
                     package_dict = model_to_dict(package)
                     versions = Version.objects.filter(parent_package=package)
-                    package_dict['versions'] = list(map(
-                        lambda x: x.id, versions))
+                    versions = list(map(lambda x: x.id, versions))
+                    package_dict['versions'] = versions
                     package_dict['keywords'] = package.split_keywords()
 
                     package_dicts.append(package_dict)
