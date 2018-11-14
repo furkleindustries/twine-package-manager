@@ -13,11 +13,7 @@ class IndexView(generic.ListView):
     context_object_name = 'packages'
 
     def get_queryset(self):
-        packages = Package.objects.order_by('-date_created')
-        for package in packages:    
-            package.keywords = ', '.join(package.keywords)
-
-        return packages
+        return Package.objects.order_by('-date_created')
 
 
 class SearchView(generic.ListView):
@@ -34,11 +30,7 @@ class SearchView(generic.ListView):
         if search == '*':
             return packages
 
-        packages = packages_search_filter(search, packages)
-        for package in packages:    
-            package.keywords = ', '.join(package.keywords)
-
-        return packages
+        return packages_search_filter(search, packages)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

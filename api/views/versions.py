@@ -94,21 +94,28 @@ def versions(request, version_id):
         except DatabaseError as error:
             print(error)
 
-        return get_item_response(model_to_dict(version))
+        version_dict = model_to_dict(version)
+        version_dict['date_created'] = version_dict['date_created'].isoformat()
+
+        return get_item_response(version)
     # Requires version_id pretty url argument
     if method == 'GET' or method == 'DELETE':
         if not version_id:
             return get_id_not_provided_response('version', method)
 
         if method == 'GET':
+            version = None
             try:
-                ver = Version.objects.get(id=version_id)
-                version_dict = model_to_dict(ver)
-                return get_item_response(version_dict)
+                version = Version.objects.get(id=version_id)
             except Version.DoesNotExist:
                 return get_item_not_found_response('version',
                                                    version_id)
-        # There is no PUT method for versions as they are immutable.
+
+            version_dict = model_to_dict(version)
+            date_created = version_dict['date_created']
+            version_dict['date_created'] = date_created.isoformat()
+            return get_item_response(version_dict)
+
         elif method == 'DELETE':
             if not request.user.is_authenticated:
                 return get_permission_denied_response('version', method)
@@ -124,3 +131,5 @@ def versions(request, version_id):
             # Fill in version deletion here.
 
     return get_method_not_supported_response('version', method)
+
+    # There is no PUT method for versions as they are immutable.

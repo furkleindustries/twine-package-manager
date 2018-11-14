@@ -11,6 +11,25 @@ from versions.models import Version
 from .api_responses import *
 
 
+def get_full_package_dict(package):
+    package_dict = model_to_dict(package)
+    versions = Version.objects.filter(parent_package=package)
+    version_ids = list(map(lambda x: x.id, versions))
+
+    package_dict['default_version'] = None
+    default_version = package.default_version
+    if default_version:
+        package_dict['default_version'] = default_version.version_identifier
+
+    package_dict.update({
+        'date_created': package.date_created.isoformat(),
+        'date_modified': package.date_modified.isoformat(),
+        'versions': version_ids,
+    })
+
+    return package_dict
+
+
 def packages(request, package_id):
     method = request.method
 
@@ -35,10 +54,7 @@ def packages(request, package_id):
             return get_argument_not_provided_response('package', 'name',
                                                       'creating')
 
-        try:
-            keywords = split_keywords(keywords)
-        except Exception as err:
-            return get_create_error_response('package', err)
+        keywords = split_keywords(keywords)
 
         already_exists_package = None
         try:
@@ -82,7 +98,7 @@ def packages(request, package_id):
 
             return get_create_error_response('package', package_id)
 
-        return get_item_response(model_to_dict(package))
+        return get_item_response(get_full_package_dict(package))
     # Requires package_id pretty url argument
     if method == 'GET' or method == 'PUT' or method == 'DELETE':
         if not package_id:
@@ -113,26 +129,7 @@ def packages(request, package_id):
                 if quantity is not None:
                     models = models[0:quantity]
 
-                package_dicts = []
-                # Add the version identifiers to each package.
-                for package in models:
-                    package_dict = model_to_dict(package)
-                    versions = Version.objects.filter(parent_package=package)
-                    versions = list(map(lambda x: x.id, versions))
-                    package_dict['versions'] = versions
-                    package_dict['keywords'] = package.keywords
-
-                    package_dicts.append(package_dict)
-
-                    # Increment the download count for each package.
-                    package.downloads += 1
-                    try:
-                        package.full_clean()
-                        package.save()
-                    except DatabaseError as error:
-                        print(error)
-
-                to_return = package_dicts
+                to_return = list(map(get_full_package_dict, models))
             else:
                 package = None
                 try:
@@ -141,26 +138,12 @@ def packages(request, package_id):
                     return get_item_not_found_response('package',
                                                        package_id)
 
-                package_dict = model_to_dict(package)
-                versions = Version.objects.filter(parent_package=package)
-                package_dict['versions'] = list(map(
-                    lambda x: x.version_identifier, versions))
-
-                # Increment the download count.
-                package.downloads += 1
-                try:
-                    package.full_clean()
-                    package.save()
-                except DatabaseError as error:
-                    print(error)
-
-                to_return = package_dict
+                to_return = get_full_package_dict(package)
 
             # Send it to the client.
             return get_item_response(to_return)
         elif method == 'PUT':
             user = request.user
-            print(request.body)
             put = loads(request.body)
 
             if not user.is_authenticated:
@@ -205,15 +188,7 @@ def packages(request, package_id):
 
                 return get_update_error_response('package', package_id)
 
-            item = model_to_dict(package)
-
-            # Send the version identifier, not the version surrogate key.
-            if package.default_version:
-                item['default_version'] = default_version.version_identifier
-
-            item['date_modified'] = package.date_modified
-
-            return get_item_response(item)
+            return get_item_response(get_full_package_dict(package))
         elif method == 'DELETE':
             user = request.user
 

@@ -31,6 +31,7 @@ def profiles(request, user_id):
                 profile_dict = {
                     'username': user.username,
                     'user_id': user.id,
+                    
                 }
 
                 # Respect the user's email visible setting for API requests.
@@ -54,10 +55,10 @@ def profiles(request, user_id):
                 del profile_dict['email_visible']
 
                 date_joined = user.date_joined
-                profile_dict['date_joined'] = date_joined.timestamp()
+                profile_dict['date_joined'] = date_joined.isoformat()
 
                 last_login = user.last_login
-                profile_dict['last_login'] = last_login.timestamp()
+                profile_dict['last_login'] = last_login.isoformat()
 
                 return get_item_response(profile_dict)
             except Profile.DoesNotExist:
