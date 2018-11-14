@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block extraheaders %}
+<title>Twine Package Manager - Search {{ query }}</title>
+<meta
+    name="description"
+    content="A search of the Twine Package Manager database for {{ query }}."
+>
+{% endblock %}
+
+{% block content %}
+    <article>
+        {% if query %}
+            <ul>
+                {% for package in packages %}
+                    {% with package_links=True as_list=True %}
+                        {% include "packages/package.html" %}
+                    {% endwith %}
+                {% empty %}
+                        No packages match the query "{{ query }}".
+                {% endfor %}
+            </ul>
+
+            <script>
+            /* Set the search bar value to the performed query. */
+            document.querySelector('.searchBar').value = '{{ query|default:"" }}';
+            </script>
+        {% else %}
+            <p>
+                You must provide a search query to get search results.
+            </p>
+        {% endif %}
+    </article>
+{% endblock %}

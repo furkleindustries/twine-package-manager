@@ -16,14 +16,17 @@ class AccountView(LoginRequiredMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         user = self.request.user
         context = super().get_context_data(**kwargs)
-        context['form_after_submit_action'] = 'update_page'
-        context['form_destination'] = '/api/profiles/{}/'.format(user.id)
-        context['form_method'] = 'PUT'
-        context['form_selector'] = '#accountUpdate'
-        context['logged_in'] = True
-        context['packages'] = Package.objects.filter(author_id=user.id)
-        context['profile'] = get_object_or_404(Profile, user_id=user.id)
-        context['user'] = user
+        context.update({
+            'form_after_submit_action': 'update_page',
+            'form_destination': '/api/profiles/{}/'.format(user.id),
+            'form_method': 'PUT',
+            'form_selector': '#accountUpdate',
+            'packages': Package.objects.filter(author_id=user.id).order_by(
+                '-date_created'),
+            'profile': get_object_or_404(Profile, user_id=user.id),
+            'user': user,
+        })
+
         return context
 
 

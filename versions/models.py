@@ -15,8 +15,6 @@ class Version(models.Model):
     js = models.TextField(blank=True, default='')
     css = models.TextField(blank=True, default='')
 
-    homepage = models.URLField(blank=True, default='')
-
     parent_package = models.ForeignKey(
         'packages.Package',
         on_delete=models.CASCADE,

@@ -1,9 +1,7 @@
-from json import dumps, loads
+from json import dumps
 
 from django.http import HttpResponse
 from django.shortcuts import redirect
-
-from django.forms.models import model_to_dict
 
 
 def with_default_headers(response):
@@ -223,16 +221,10 @@ def get_version_not_found_error_response(package_id, version_identifier):
 
 
 def get_item_response(item):
-    final_form = None
-    if isinstance(item, dict):
-        final_form = dumps(item)
-    elif isinstance(item, list):
-        final_form = dumps(list(map(lambda x: model_to_dict(x), item)))
-    else:
-        final_form = dumps(model_to_dict(item))
+    json = dumps(item)
 
     response = HttpResponse(
-        final_form,
+        json,
         status=200,
     )
 

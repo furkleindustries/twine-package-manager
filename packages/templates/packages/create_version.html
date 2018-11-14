@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block extraheaders %}
-<title>Twine Package Manager - Create new version for package ({{ package.name|default:'Error: no name' }})</title>
+<title>Twine Package Manager - Create new version for package {{ package.name|default:'Error: no name' }}</title>
 <meta
     name="description"
     content="Create new version for {{ package.name|default:'a package' }}."
@@ -45,12 +45,10 @@
             >
         </div>
 
-        {% if existing_versions is not None %}
+        {% if existing_versions and existing_versions is not None %}
             <div>
-                {% if existing_versions %}
-                    <button class="hider" type="button">▶</button>
-                {% endif %}                
-
+                <button class="hider" type="button">▶</button>
+                
                 <label>
                     <em>
                         Existing versions for this package
@@ -89,19 +87,6 @@
         </div>
 
         <div>
-            <label for="homepage">
-                <em>
-                    Package homepage
-                </em>
-            </label>
-
-            <input
-                id="homepage"
-                name="homepage"
-            >
-        </div>
-
-        <div>
             <label for="js">
                 <em>
                     JavaScript
@@ -127,11 +112,10 @@
             ></textarea>
         </div>
 
-        
         <button id="submit" type="button">
             Create version
         </button>
-        
+
         <div class="error"></div>
     </form>
 </article>
