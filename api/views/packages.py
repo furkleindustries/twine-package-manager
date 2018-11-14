@@ -5,7 +5,7 @@ from django.db import Error as DatabaseError
 from django.forms.models import model_to_dict
 
 from packages.search import packages_search_filter
-from packages.models import Package, DeletedPackage
+from packages.models import Package, DeletedPackage, split_keywords
 from versions.models import Version
 
 from .api_responses import *
@@ -23,13 +23,22 @@ def packages(request, package_id):
 
         name = post.get('name')
         description = post.get('description')
+
         homepage = post.get('homepage') or ''
-        keywords = post.get('keywords') or ''
+        if homepage and not homepage.startswith('http'):
+            homepage = 'http://' + homepage
+
+        keywords = post.get('keywords') or '[]'
         tag = post.get('tag') or ''
 
         if not name:
             return get_argument_not_provided_response('package', 'name',
                                                       'creating')
+
+        try:
+            keywords = split_keywords(keywords)
+        except Exception as err:
+            return get_create_error_response('package', err)
 
         already_exists_package = None
         try:
@@ -111,7 +120,7 @@ def packages(request, package_id):
                     versions = Version.objects.filter(parent_package=package)
                     versions = list(map(lambda x: x.id, versions))
                     package_dict['versions'] = versions
-                    package_dict['keywords'] = package.split_keywords()
+                    package_dict['keywords'] = package.keywords
 
                     package_dicts.append(package_dict)
 
@@ -151,6 +160,7 @@ def packages(request, package_id):
             return get_item_response(to_return)
         elif method == 'PUT':
             user = request.user
+            print(request.body)
             put = loads(request.body)
 
             if not user.is_authenticated:
@@ -169,7 +179,7 @@ def packages(request, package_id):
                 package.homepage = put['homepage']
 
             if 'keywords' in put:
-                package.keywords = put['keywords']
+                package.keywords = split_keywords(put['keywords'])
 
             if 'default_version' in put:
                 default_version = put['default_version']
@@ -198,8 +208,10 @@ def packages(request, package_id):
             item = model_to_dict(package)
 
             # Send the version identifier, not the version surrogate key.
-            default_version = package.default_version
-            item['default_version'] = default_version.version_identifier
+            if package.default_version:
+                item['default_version'] = default_version.version_identifier
+
+            item['date_modified'] = package.date_modified
 
             return get_item_response(item)
         elif method == 'DELETE':

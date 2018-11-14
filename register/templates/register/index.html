@@ -2,7 +2,6 @@
 
 {% block extraheaders %}
 <title>Twine Package Manager - Register</title>
-
 <meta
     name="description"
     content="Register an account to start contributing to Twine Package Manager."
@@ -10,46 +9,12 @@
 {% endblock %}
 
 {% block content %}
-    <form action="/register/" method="POST">
-        <div>
-            <label for="username">
-                Username
-            </label>
+    <h2>Sign up</h2>
+    <form method="post">
+        {% csrf_token %}
 
-            <input
-                autofocus
-                id="username"
-                name="username"
-            >
-        </div>
+        {{ form.as_p }}
 
-        <div>
-            <label for="password">
-                Password
-            </label>
-
-            <input
-                id="password"
-                name="password"
-                type="password"
-            >
-        </div>
-
-        
-        <label for="email">
-            E-mail
-        </label>
-
-        <input
-            id="email"
-            name="email"
-            type="email"
-        >
-
-        <div class="error"></div>
+        <button type="submit">Sign up</button>
     </form>
-
-    {% include 'form_script.html' %}
-
-    <script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></script>
 {% endblock %}

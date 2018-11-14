@@ -1,6 +1,7 @@
 from json import loads
 
 from django.core.exceptions import ValidationError
+from django.db import Error as DatabaseError
 from django.forms.models import model_to_dict
 
 from profiles.models import Profile
@@ -120,7 +121,7 @@ def profiles(request, user_id):
             try:
                 profile.full_clean()
                 profile.save()
-            except (Exception, ValidationError) as error:
+            except (DatabaseError, ValidationError) as error:
                 if isinstance(error, ValidationError):
                     return get_update_error_response(
                         'profile', user.id,
@@ -132,7 +133,7 @@ def profiles(request, user_id):
             try:
                 user.full_clean()
                 user.save()
-            except (Exception, ValidationError) as error:
+            except (DatabaseError, ValidationError) as error:
                 if isinstance(error, ValidationError):
                     return get_update_error_response(
                         'profile', user.id,

@@ -23,7 +23,7 @@
          so that the inputs do not move after the errors are hidden. -->
     <ul class="error">
         {% for field in form %}
-            {% for error in field.errors %}
+            {% for error in fields %}
                 <li>
                     {{ error|escape }}
                 </li>

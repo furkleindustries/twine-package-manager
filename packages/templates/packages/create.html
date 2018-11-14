@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block extraheaders %}
-<title>Twine Package Manager - Package ({{ package.name|default:'Error: no name' }})</title>
+<title>Twine Package Manager - Create Package</title>
 <meta
     name="description"
-    content="{% if package.package.description %}{{ package.package.description }}{% else %}A detailed view of {% if package.package.name %}the {{ package.package.name}}{% else %}a Twine{% endif %} package.{% endif %}"
+    content="Create a new package with the Twine Package Manager."
 >
 {% endblock %}
 
@@ -75,7 +75,7 @@
             Create package
         </button>
 
-        <div class="error"></div>
+        <ul class="error"></ul>
     </form>
 </article>
 
