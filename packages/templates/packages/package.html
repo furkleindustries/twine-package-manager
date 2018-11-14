@@ -6,9 +6,15 @@
     {% endif %}
         <h3>
             {% if package_links %}
-                <a href="/packages/{{ package.id }}">
-                    {{ package.name }}
-                </a>
+                {% if package.owner == request.user %}
+                    <a href="/packages/{{ package.id }}/edit">
+                        {{ package.name }}
+                    </a>
+                {% else %}
+                    <a href="/packages/{{ package.id }}">
+                        {{ package.name }}
+                    </a>
+                {% endif %}
             {% else %}
                 {{ package.name }}
             {% endif %}
@@ -93,7 +99,7 @@
                         Versions
                     </em>
                 </h4>
-                
+
                 <a href="/packages/{{ package.id }}/create_version/">
                     Create new version
                 </a>

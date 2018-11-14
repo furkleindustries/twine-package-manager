@@ -34,7 +34,6 @@ class IndexView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['logged_in'] = self.request.user.is_authenticated
         context['with_links'] = True
         return context
 
@@ -46,8 +45,9 @@ class DetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         user = context.get('user')
-        context['logged_in'] = user.is_authenticated
+
         context['packages'] = Package.objects.filter(owner_id=user.id)
         context['profile'] = user.profile
         context['with_labels'] = True

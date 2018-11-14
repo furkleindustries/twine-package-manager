@@ -5,7 +5,6 @@
 
     <a href="/profiles">Profiles</a>
 
-    
     {% if logged_in %}
         <a href="/account">Account</a>
 
@@ -15,4 +14,16 @@
 
         <a href="/login">Login</a>
     {% endif %}
+
+    <div class="searchBarContainer">
+        <input
+            type="text"
+            class="searchBar"
+            tabindex="1"
+        >
+
+        <button class="searchButton">
+            Search
+        </button>
+    </div>
 </header>

@@ -1,6 +1,7 @@
 from json import loads
 
 from django.core.exceptions import ValidationError
+from django.db import Error as DatabaseError
 from django.forms.models import model_to_dict
 
 from packages.models import Package, DeletedPackage
@@ -63,15 +64,15 @@ def packages(request, package_id):
         try:
             package.full_clean()
             package.save()
-        except (Exception, ValidationError) as error:
+        except (DatabaseError, ValidationError) as error:
             if isinstance(error, ValidationError):
                 return get_create_error_response('package',
                                                  error=dumps(error.messages),
                                                  status=400)
-            else:
-                return get_create_error_response('package', package_id)
 
-        return get_item_response(package)
+            return get_create_error_response('package', package_id)
+
+        return get_item_response(model_to_dict(package))
     # Requires package_id pretty url argument
     if method == 'GET' or method == 'PUT' or method == 'DELETE':
         if not package_id:
@@ -79,37 +80,78 @@ def packages(request, package_id):
 
         if method == 'GET':
             to_return = None
-            try:
-                # Retrieve the package.
-                if package_id == '*':
-                    cursor = request.GET.get('cursor') or None
-                    if cursor:
-                        cursor = int(cursor)
+            # Retrieve the package.
+            if package_id == '*':
+                cursor = request.GET.get('cursor') or None
+                if cursor:
+                    cursor = int(cursor)
 
-                    quantity = request.GET.get('quantity') or None
-                    if quantity:
-                        quantity = int(quantity)
+                quantity = request.GET.get('quantity') or None
+                if quantity:
+                    quantity = int(quantity)
 
-                    temp = Package.objects.all().order_by('-id')
-                    if cursor is not None:
-                        temp = temp.filter(id__gte=cursor)
+                models = Package.objects.all()
 
-                    if quantity is not None:
-                        temp = temp[0:quantity]
-                        
-                    to_return = list(temp)
-                else:
-                    to_return = Package.objects.get(id=package_id)
+                search = request.GET.get('search') or None
+                if search:
+                    search = search.replace(',', '').replace('.', '')
+                    # Get results that contain the search in the name.
+                    models = models.filter(name__icontains=search).union(
+                        # Add results that contain the search in the
+                        # description.
+                        models.filter(description__icontains=search),
+                        # Add results that contain the search in the keywords.
+                        models.filter(keywords__icontains=search))
 
-                    # Increment the download count.
+                if cursor is not None:
+                    models = models.filter(id__gte=cursor)
+
+                # Slice the result if a quantity was provided.
+                if quantity is not None:
+                    models = models[0:quantity]
+
+                package_dicts = []
+                # Add the version identifiers to each package.
+                for package in models:
+                    package_dict = model_to_dict(package)
+                    versions = Version.objects.filter(parent_package=package)
+                    package_dict['versions'] = list(map(
+                        lambda x: x.id, versions))
+                    package_dict['keywords'] = package.split_keywords()
+
+                    package_dicts.append(package_dict)
+
+                    # Increment the download count for each package.
                     package.downloads += 1
                     try:
                         package.full_clean()
                         package.save()
-                    except Exception as error:
+                    except DatabaseError as error:
                         print(error)
-            except Package.DoesNotExist:
-                return get_item_not_found_response('package', package_id)
+
+                to_return = package_dicts
+            else:
+                package = None
+                try:
+                    package = Package.objects.get(id=package_id)
+                except Package.DoesNotExist:
+                    return get_item_not_found_response('package',
+                                                       package_id)
+
+                package_dict = model_to_dict(package)
+                versions = Version.objects.filter(parent_package=package)
+                package_dict['versions'] = list(map(
+                    lambda x: x.version_identifier, versions))
+
+                # Increment the download count.
+                package.downloads += 1
+                try:
+                    package.full_clean()
+                    package.save()
+                except DatabaseError as error:
+                    print(error)
+
+                to_return = package_dict
 
             # Send it to the client.
             return get_item_response(to_return)
@@ -151,13 +193,13 @@ def packages(request, package_id):
             try:
                 package.full_clean()
                 package.save()
-            except (Exception, ValidationError) as error:
+            except (DatabaseError, ValidationError) as error:
                 if isinstance(error, ValidationError):
                     return get_update_error_response(
                         'package', package_id, error=dumps(error.messages),
                         status=400)
-                else:
-                    return get_update_error_response('package', package_id)
+
+                return get_update_error_response('package', package_id)
 
             item = model_to_dict(package)
 
@@ -180,9 +222,9 @@ def packages(request, package_id):
 
             try:
                 package.delete()
-            except Exception as e:
-                print(e)
-                get_update_error_response('package', package.id)
+            except DatabaseError as error:
+                print(error)
+                return get_update_error_response('package', package.id)
 
             deleted_package = DeletedPackage(
                 name=package.name,
@@ -192,8 +234,8 @@ def packages(request, package_id):
             try:
                 deleted_package.full_clean()
                 deleted_package.save()
-            except Exception as e:
-                print(e)
+            except DatabaseError as err:
+                print(err)
 
             return get_item_response({
                 'result': 'success',

@@ -21,12 +21,13 @@
             if (tagName === 'select') {
                 /* Allow options to indicate that they represent a different
                  * value used on the server side. */
-                Array.prototype.slice.call(child.querySelectorAll('option')).forEach(function each(option) {
-                    if (option.value === child.value && option.dataset.dbValue) {
-                        found = true;
-                        payload[name] = option.dataset.dbValue;
-                    }
-                });
+                Array.prototype.slice.call(child.querySelectorAll('option'))
+                    .forEach(function each(option) {
+                        if (option.value === child.value && option.dataset.dbValue) {
+                            found = true;
+                            payload[name] = option.dataset.dbValue;
+                        }
+                    });
 
                 if (!found) {
                     payload[name] = child.value;

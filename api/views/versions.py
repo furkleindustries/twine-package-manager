@@ -1,6 +1,8 @@
 from json import loads
 
+from django.db import Error as DatabaseError
 from django.core.exceptions import ValidationError
+from django.forms.models import model_to_dict
 
 from .api_responses import *
 
@@ -56,7 +58,6 @@ def versions(request, version_id):
                                                       'creating')
 
         description = post['description']
-        homepage = post.get('homepage') or ''
         js = post.get('js') or ''
         css = post.get('css') or ''
 
@@ -69,7 +70,6 @@ def versions(request, version_id):
             parent_package=package,
             author=user,
             description=description,
-            homepage=homepage,
             js=js,
             css=css,
         )
@@ -77,13 +77,13 @@ def versions(request, version_id):
         try:
             version.full_clean()
             version.save()
-        except (Exception, ValidationError) as error:
+        except (DatabaseError, ValidationError) as error:
             if isinstance(error, ValidationError):
                 return get_create_error_response('version',
                                                  error=dumps(error.messages),
                                                  status=400)
             else:
-                return get_create_error_response('version', version_identifier)
+                return get_create_error_response('version', error)
 
         try:
             # Set the version as the default if it's the only existing version.
@@ -91,10 +91,10 @@ def versions(request, version_id):
                 package.default_version = version
                 package.full_clean()
                 package.save()
-        except Exception as error:
+        except DatabaseError as error:
             print(error)
 
-        return get_item_response(version)
+        return get_item_response(model_to_dict(version))
     # Requires version_id pretty url argument
     if method == 'GET' or method == 'DELETE':
         if not version_id:
@@ -102,12 +102,13 @@ def versions(request, version_id):
 
         if method == 'GET':
             try:
-                return get_item_response(Version.objects.get(id=version_id))
+                ver = Version.objects.get(id=version_id)
+                version_dict = model_to_dict(ver)
+                return get_item_response(version_dict)
             except Version.DoesNotExist:
                 return get_item_not_found_response('version',
                                                    version_id)
         # There is no PUT method for versions as they are immutable.
-        # TODO: change this so that descriptions and homepages can be changed
         elif method == 'DELETE':
             if not request.user.is_authenticated:
                 return get_permission_denied_response('version', method)

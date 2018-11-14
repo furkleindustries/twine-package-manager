@@ -15,9 +15,39 @@ class IndexView(generic.ListView):
         packages = Package.objects.order_by('-date_created')
         return packages
 
+
+class SearchView(generic.ListView):
+    template_name = 'packages/search.html'
+    context_object_name = 'packages'
+
+    def get_queryset(self):
+        packages = Package.objects.all()
+        search = self.request.GET.get('query')
+        if not search:
+            return []
+
+        search = search.strip()
+        if search == '*':
+            return packages
+
+        search = search.replace(',', '').replace('.', '')
+
+        # Get results that contain the search in the name.
+        packages = packages.filter(name__icontains=search).union(
+                   # Add results that contain the search in the
+                   # description.
+                   packages.filter(description__icontains=search),
+                   # Add results that contain the search in the keywords.
+                   packages.filter(keywords__icontains=search))
+
+        return packages
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['logged_in'] = self.request.user.is_authenticated
+        context.update({
+            'query': self.request.GET.get('query'),
+        })
+
         return context
 
 
@@ -36,7 +66,6 @@ class DetailView(generic.DetailView):
                 default_version = version
 
         context.update({
-            'logged_in': self.request.user.is_authenticated,
             'package': package,
             'default_version': default_version,
             'versions': versions,
@@ -60,7 +89,6 @@ class UpdateView(LoginRequiredMixin, generic.DetailView):
             'form_destination': '/api/packages/{}/'.format(package.id),
             'form_method': 'PUT',
             'form_selector': '#packageUpdate',
-            'logged_in': True,
             'versions': versions,
         })
 
@@ -72,10 +100,12 @@ class CreateView(LoginRequiredMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_destination'] = '/api/packages/'
-        context['form_method'] = 'POST'
-        context['form_selector'] = '#packageCreate'
-        context['logged_in'] = True
+        context.update({
+            'form_destination': '/api/packages/',
+            'form_method': 'POST',
+            'form_selector': '#packageCreate',
+        })
+
         return context
 
 
@@ -92,7 +122,6 @@ class DeleteView(LoginRequiredMixin, generic.DeleteView):
             'form_destination': '/api/packages/{}/'.format(package.id),
             'form_method': 'DELETE',
             'form_selector': '#packageDelete',
-            'logged_in': True,
             'versions': versions,
         })
 
@@ -111,16 +140,18 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
         versions.sort(
             # Sort them as lists of major-minor-patch versions, in (hopefully)
             # valid semver order.
-            key=lambda x: list(map(int, x.version_identifier.split('.'))),
+            key=lambda x: x.version_identifier.split('.'),
             reverse=True,
         )
 
+        back_url = '/packages/{}/edit/'.format(package_id)
+
         context.update({
             'package': package,
+            'form_after_submit_redirect': back_url,
             'form_destination': '/api/versions/',
             'form_method': 'POST',
             'form_selector': '#versionCreate',
-            'logged_in': True,
             'existing_versions': versions,
         })
 

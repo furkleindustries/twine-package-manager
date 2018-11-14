@@ -70,16 +70,20 @@
                 </em>
             </label>
 
-            <select
-                id="default_version"
-                name="default_version"
-            >
-                {% for version in versions %}
-                    <option {% if package.default_version == version %}selected{% endif %}>
-                        {{ version.version_identifier }}
-                    </option>
-                {% endfor %}
-            </select>
+            {% if versions|length > 1 %}
+                <select
+                    id="default_version"
+                    name="default_version"
+                >
+                    {% for version in versions %}
+                        <option {% if package.default_version == version %}selected{% endif %}>
+                            {{ version.version_identifier }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <span>{{ package.default_version.version_identifier }}</span>
+            {% endif %}
         </div>
         {% endif %}
 
@@ -89,10 +93,14 @@
             </em>
         </label>
 
-        {{ package.default_version.version_identifier }}
+        <div>
+            <div>
+                <a href="/packages/{{ package.id }}/create_version/">
+                    Create new version
+                </a>
+            </div>
 
-        {% if versions %}
-            <div>  
+            {% if versions %}
                 <ul>
                     {% for version in versions %}
                         <li class="version">
@@ -104,23 +112,19 @@
                                 {{ version.version_identifier }}
                             </strong>
 
-                            <a href="/versions/{{ version.id }}/edit/">Edit</a>
+                            <a href="/versions/{{ version.id }}/edit/"
+                            >Edit</a>
 
-                            <a href="/versions/{{ version.id }}/delete/">Delete</a>
+                            <a href="/versions/{{ version.id }}/delete/"
+                            >Delete</a>
                         </li>
                     {% endfor %}
                 </ul>
-            </div>
-        {% elif versions is not None %}
-            <div>
+            {% elif versions is not None %}
                 <p>
                     No versions created.
                 </p>
-            </div>
-        {% endif %}
-    
-        <div>
-            <a href="/packages/{{ package.id }}/create_version/">Create new version</a>
+            {% endif %}
         </div>
 
         <div>
