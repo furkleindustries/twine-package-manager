@@ -1,8 +1,17 @@
-from django.db import models
-from django.contrib.auth.models import User
 from re import split
 
+from django.db import models
+from django.contrib.auth.models import User
+
+from django.contrib.postgres.fields import JSONField
+from django.utils import timezone
+
 from versions.models import Version
+
+
+class AutoDateTimeField(models.DateTimeField):
+    def pre_save(self, model_instance, add):
+        return timezone.now()
 
 
 class Package(models.Model):
@@ -31,10 +40,11 @@ class Package(models.Model):
         on_delete=models.SET_DEFAULT,
     )
 
-    keywords = models.TextField(blank=True, default='')
+    keywords = JSONField(blank=True, default='')
     tag = models.TextField(blank=True, default='')
 
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField(default=timezone.now)
+    date_modified = AutoDateTimeField()
 
     downloads = models.IntegerField(default=0)
 
