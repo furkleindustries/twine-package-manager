@@ -4,7 +4,7 @@
 (function formPutter(e) {
     var form = document.querySelector('{{ form_selector|default:"#update" }}');
     var submitter = form.querySelector('{{ form_submitter|default:"#submit" }}');
-    var error = form.querySelector('{{ form_error|default:".error" }}');
+    var error = document.querySelector('{{ form_error|default:".error" }}');
 
     submitter.addEventListener('click', function click() {
         var csrfTokenInput = form.querySelector('[name=csrfmiddlewaretoken]');
@@ -35,6 +35,9 @@
             } else {
                 payload[name] = child.value;
             }
+
+            delete payload.date_created;
+            delete payload.date_modified;
         });
 
         xhr.withCredentials = true;
@@ -68,8 +71,12 @@
                                 if (!found) {
                                     elem.value = value;
                                 }
-                            } else {
+                            } else if (elem.tagName === 'input' ||
+                                       elem.tagName === 'textarea')
+                            {
                                 elem.value = value;
+                            } else {
+                                elem.textContent = value;
                             }
                         }
                     });
@@ -77,18 +84,33 @@
                     /* Redirect back to the account page. */
                     window.location = '{{ form_after_submit_redirect|default:"/account/" }}';
                 {% endif %}
-            } else {
-                if (error) {
-                    /* Display the server error. */
-                    error.textContent = responseObj.error || 'Unknown error.';
-                    /* Clear the error after a timeout. */
-                    setTimeout(function timeout() {
-                        error.textContent = '';
-                    }, 6000);
-                } else {
-                    console.log('Could not find error element. Error was:');
-                    console.log(responseObj.error);
+            } else if (error) {
+                var errors;
+                try {
+                    errors = JSON.parse(responseObj.error);
+                } catch (e) {}
+
+                if (!Array.isArray(errors)) {
+                    if (responseObj.error) {
+                        errors = [ responseObj.error, ];
+                    } else {
+                        errors = [];
+                    }
                 }
+
+                errors.forEach(function each(err) {
+                    var li = document.createElement('li');
+                    li.textContent = err;
+                    error.appendChild(li);
+                });
+
+                /* Clear the error after a timeout. */
+                setTimeout(function timeout() {
+                    error.innerHTML = '';
+                }, 6000);
+            } else {
+                console.log('Could not find error element. Error was:');
+                console.log(responseObj.error);
             }
         };
 

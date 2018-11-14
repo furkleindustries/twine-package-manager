@@ -145,13 +145,13 @@
                 {% endif %}
 
                 {% if keyword_links %}
-                    {% for keyword in package.split_keywords %}
+                    {% for keyword in package.keywords %}
                         <a href="/packages/keywords/{{ keyword }}/">{{ keyword }}</a>
                     {% endfor %}
                 {% else %}
-                    <p>
-                        {{ package.keywords }}
-                    </p>
+                    {% for keyword in package.keywords %}
+                        <span>{{ keyword }}</span>
+                    {% endfor %}
                 {% endif %}
             </div>
         {% endif %}

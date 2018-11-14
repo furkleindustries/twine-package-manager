@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from packages.models import Package
+from packages.search import packages_search_filter
 from versions.models import Version
 
 from .models import Package
@@ -13,6 +14,9 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         packages = Package.objects.order_by('-date_created')
+        for package in packages:    
+            package.keywords = ', '.join(package.keywords)
+
         return packages
 
 
@@ -30,15 +34,9 @@ class SearchView(generic.ListView):
         if search == '*':
             return packages
 
-        search = search.replace(',', '').replace('.', '')
-
-        # Get results that contain the search in the name.
-        packages = packages.filter(name__icontains=search).union(
-                   # Add results that contain the search in the
-                   # description.
-                   packages.filter(description__icontains=search),
-                   # Add results that contain the search in the keywords.
-                   packages.filter(keywords__icontains=search))
+        packages = packages_search_filter(search, packages)
+        for package in packages:    
+            package.keywords = ', '.join(package.keywords)
 
         return packages
 
@@ -59,6 +57,7 @@ class DetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = context['package']
+        package.keywords = ', '.join(package.keywords)
         versions = list(Version.objects.filter(parent_package=package))
         default_version = None
         for version in versions:
@@ -82,6 +81,7 @@ class UpdateView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = context['package']
+        package.keywords = ', '.join(package.keywords)
         versions = Version.objects.filter(parent_package=package)
         versions = versions.order_by('-date_created')
         context.update({

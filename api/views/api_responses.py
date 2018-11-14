@@ -1,3 +1,4 @@
+from datetime import datetime
 from json import dumps
 
 from django.http import HttpResponse
@@ -222,12 +223,7 @@ def get_version_not_found_error_response(package_id, version_identifier):
 
 def get_item_response(item):
     json = dumps(item)
-
-    response = HttpResponse(
-        json,
-        status=200,
-    )
-
+    response = HttpResponse(json)
     return with_default_headers(response)
 
 

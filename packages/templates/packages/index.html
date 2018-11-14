@@ -10,6 +10,10 @@
 
 {% block content %}
     <article>
+        <div>
+            <a href="/packages/create/">Create new package</a>
+        </div>
+
         <ul>
             {% for package in packages %}
                 {% with package_links=True as_list=True %}

@@ -90,28 +90,32 @@ WSGI_APPLICATION = 'twine_package_manager.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'twine_package_manager',
+        'USER': 'twine_package_manager',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
-_prefix = 'django.contrib.auth.password_validation.'
+_PREFIX = 'django.contrib.auth.password_validation.'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': '{}{}'.format(_prefix, 'UserAttributeSimilarityValidator'),
+        'NAME': '{}{}'.format(_PREFIX, 'UserAttributeSimilarityValidator'),
     },
     {
-        'NAME': '{}{}'.format(_prefix, 'MinimumLengthValidator'),
+        'NAME': '{}{}'.format(_PREFIX, 'MinimumLengthValidator'),
     },
     {
-        'NAME': '{}{}'.format(_prefix, 'CommonPasswordValidator'),
+        'NAME': '{}{}'.format(_PREFIX, 'CommonPasswordValidator'),
     },
     {
-        'NAME': '{}{}'.format(_prefix, 'NumericPasswordValidator'),
+        'NAME': '{}{}'.format(_PREFIX, 'NumericPasswordValidator'),
     },
 ]
 
@@ -132,4 +136,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = ( os.path.join('static'), )
+STATICFILES_DIRS = (os.path.join('static'),)
