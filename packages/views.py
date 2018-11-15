@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
-from packages.models import Package
+from packages.models import Package, PackageDownload
 from packages.search import packages_search_filter
 from versions.models import Version
 
@@ -13,11 +13,7 @@ class IndexView(generic.ListView):
     context_object_name = 'packages'
 
     def get_queryset(self):
-        packages = Package.objects.order_by('-date_created')
-        for package in packages:    
-            package.keywords = ', '.join(package.keywords)
-
-        return packages
+        return Package.objects.order_by('-date_created')
 
 
 class SearchView(generic.ListView):
@@ -34,11 +30,7 @@ class SearchView(generic.ListView):
         if search == '*':
             return packages
 
-        packages = packages_search_filter(search, packages)
-        for package in packages:    
-            package.keywords = ', '.join(package.keywords)
-
-        return packages
+        return packages_search_filter(search, packages)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -52,12 +44,14 @@ class SearchView(generic.ListView):
 class DetailView(generic.DetailView):
     template_name = 'packages/detail.html'
     context_object_name = 'package'
-    model = Package
+
+    def get_object(self):
+        return Package.objects.get(name=self.kwargs['name'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = context['package']
-        package.keywords = ', '.join(package.keywords)
+        downloads = PackageDownload.objects.filter(package=package).count()
         versions = list(Version.objects.filter(parent_package=package))
         default_version = None
         for version in versions:
@@ -67,6 +61,10 @@ class DetailView(generic.DetailView):
         context.update({
             'package': package,
             'default_version': default_version,
+            'downloads': downloads,
+            'show_author': True,
+            'show_labels': True,
+            'show_downloads': True,
             'versions': versions,
         })
 
@@ -75,16 +73,20 @@ class DetailView(generic.DetailView):
 
 class UpdateView(LoginRequiredMixin, generic.DetailView):
     context_object_name = 'package'
-    model = Package
     template_name = 'packages/edit.html'
+
+    def get_object(self):
+        return Package.objects.get(name=self.kwargs['name'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = context['package']
+        downloads = PackageDownload.objects.filter(package=package).count()
         package.keywords = ', '.join(package.keywords)
         versions = Version.objects.filter(parent_package=package)
         versions = versions.order_by('-date_created')
         context.update({
+            'downloads': downloads,
             'form_after_submit_action': 'update_page',
             'form_destination': '/api/packages/{}/'.format(package.id),
             'form_method': 'PUT',
@@ -111,8 +113,10 @@ class CreateView(LoginRequiredMixin, generic.TemplateView):
 
 class DeleteView(LoginRequiredMixin, generic.DeleteView):
     context_object_name = 'package'
-    model = Package
     template_name = 'packages/delete.html'
+
+    def get_object(self):
+        return Package.objects.get(name=self.kwargs['name'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -134,8 +138,8 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        package_id = self.kwargs['pk']
-        package = Package.objects.get(id=package_id)
+        package_name = self.kwargs['name']
+        package = Package.objects.get(name=package_name)
         versions = list(Version.objects.filter(parent_package=package))
         versions.sort(
             # Sort them as lists of major-minor-patch versions, in (hopefully)
@@ -144,7 +148,7 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
             reverse=True,
         )
 
-        back_url = '/packages/{}/edit/'.format(package_id)
+        back_url = '/packages/{}/edit/'.format(package_name)
 
         context.update({
             'package': package,

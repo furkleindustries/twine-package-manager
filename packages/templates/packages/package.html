@@ -7,11 +7,11 @@
         <h3>
             {% if package_links %}
                 {% if package.owner == request.user %}
-                    <a href="/packages/{{ package.id }}/edit">
+                    <a href="/packages/{{ package.name }}/edit">
                         {{ package.name }}
                     </a>
                 {% else %}
-                    <a href="/packages/{{ package.id }}">
+                    <a href="/packages/{{ package.name }}">
                         {{ package.name }}
                     </a>
                 {% endif %}
@@ -76,7 +76,7 @@
             </div>
         {% endif %}
 
-        {% if package.downloads is not None and show_downloads %}
+        {% if downloads is not None and show_downloads %}
             <div>
                 {% if show_labels %}
                 <h4>
@@ -87,7 +87,7 @@
                 {% endif %}
 
                 <p>
-                    {{ package.downloads }}
+                    {{ downloads }}
                 </p>
             </div>
         {% endif %}
@@ -100,7 +100,7 @@
                     </em>
                 </h4>
 
-                <a href="/packages/{{ package.id }}/create_version/">
+                <a href="/packages/{{ package.name }}/create_version/">
                     Create new version
                 </a>
 
@@ -144,15 +144,9 @@
                     </h4>
                 {% endif %}
 
-                {% if keyword_links %}
-                    {% for keyword in package.keywords %}
-                        <a href="/packages/keywords/{{ keyword }}/">{{ keyword }}</a>
-                    {% endfor %}
-                {% else %}
-                    {% for keyword in package.keywords %}
-                        <span>{{ keyword }}</span>
-                    {% endfor %}
-                {% endif %}
+                {% for keyword in package.keywords %}
+                    {% if keyword_links %}<a href="/packages/keywords/{{ keyword }}/">{{ keyword }}</a>{% else %}<span>{{ keyword }}</span>{% endif %}{% if forloop.revcounter != 1 %},{% endif %}
+                {% endfor %}
             </div>
         {% endif %}
     {% if as_list %}

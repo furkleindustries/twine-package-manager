@@ -39,6 +39,18 @@
         <div>
             <label>
                 <em>
+                    Downloads
+                </em>
+            </label>
+
+            <span>
+                {{ downloads }}
+            </span>
+        </div>
+
+        <div>
+            <label>
+                <em>
                     Date created
                 </em>
             </label>
@@ -66,7 +78,9 @@
 
         <div>
             <label for="homepage">
-                Package homepage
+                <em>
+                    Package homepage
+                </em>
             </label>
 
             <input
@@ -123,7 +137,7 @@
 
         <div>
             <div>
-                <a href="/packages/{{ package.id }}/create_version/">
+                <a href="/packages/{{ package.name }}/create_version/">
                     Create new version
                 </a>
             </div>
@@ -173,7 +187,7 @@
     </form>
 
     <div>
-        <a href="/packages/{{ package.id }}/delete/">
+        <a href="/packages/{{ package.name }}/delete/">
             Delete package
         </a>
     </div>
