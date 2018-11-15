@@ -18,7 +18,7 @@ class Version(models.Model):
 
     parent_package = models.ForeignKey(
         'packages.Package',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
     )
 

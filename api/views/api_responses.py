@@ -57,12 +57,23 @@ def get_id_invalid_response(_type, _id):
     return with_default_headers(response)
 
 
-def get_version_package_id_not_provided_response(version_id):
+def get_version_package_id_not_provided_response():
     response = HttpResponse(
         dumps({
-            'error': 'There was no package ID created when trying to ' +
-                     'construct a version with the identifier {}.'
-                     .format(version_id)
+            'error': 'There was no packageId provided when trying to ' +
+                     'create, read, or delete a version.'
+        }),
+        status=400,
+    )
+
+    return with_default_headers(response)
+
+
+def get_version_version_identifier_not_provided_response():
+    response = HttpResponse(
+        dumps({
+            'error': 'There was no versionIdentifier provided when trying ' +
+                     'to create, read, or delete a version.'
         }),
         status=400,
     )

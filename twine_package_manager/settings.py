@@ -19,6 +19,10 @@ SECRET_KEY = None
 with open('secrets/django_secret_key') as f:
     SECRET_KEY = f.read().strip()
 
+POSTGRES_DATABASE_PASSWORD = None
+with open('secrets/postgres_db_password') as f:
+    POSTGRES_DATABASE_PASSWORD = f.read().strip()
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
@@ -93,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'twine_package_manager',
         'USER': 'twine_package_manager',
-        'PASSWORD': 'password',
+        'PASSWORD': POSTGRES_DATABASE_PASSWORD,
         'HOST': 'localhost',
         'PORT': '5432',
     }

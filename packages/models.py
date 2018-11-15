@@ -10,7 +10,7 @@ from versions.models import Version
 
 
 def split_keywords(keywords):
-    return split(r', *', keywords)
+    return split(r',? *', keywords)
 
 
 class AutoDateTimeField(models.DateTimeField):
@@ -46,12 +46,11 @@ class Package(models.Model):
 
     keywords = ArrayField(models.CharField(max_length=255, default=''),
                           blank=True, default=list)
+
     tag = models.TextField(blank=True, default='')
 
     date_created = models.DateTimeField(default=timezone.now, editable=False)
     date_modified = AutoDateTimeField(default=timezone.now)
-
-    downloads = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -60,5 +59,14 @@ class Package(models.Model):
 class DeletedPackage(models.Model):
     name = models.CharField(max_length=255, unique=True)
     owner_id = models.IntegerField(null=False)
-    date = models.DateTimeField(auto_now_add=True)
+    date_deleted = models.DateTimeField(default=timezone.now, editable=False)
 
+
+class PackageDownload(models.Model):
+    package = models.ForeignKey(
+        Package,
+        on_delete=models.CASCADE,
+    )
+
+    date_downloaded = models.DateTimeField(default=timezone.now,
+                                           editable=False)

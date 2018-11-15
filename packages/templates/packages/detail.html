@@ -10,8 +10,6 @@
 
 {% block content %}
 <article>
-    {% with show_author=True show_labels=True show_downloads=True %}
-        {% include "packages/package.html" %}
-    {% endwith %}
+    {% include "packages/package.html" %}
 </article>
 {% endblock %}

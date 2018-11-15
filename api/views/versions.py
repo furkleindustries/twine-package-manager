@@ -1,12 +1,13 @@
 from json import loads
 
+from django.utils import timezone
 from django.db import Error as DatabaseError
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 
 from .api_responses import *
 
-from packages.models import Package
+from packages.models import Package, PackageDownload
 from versions.models import Version
 
 
@@ -28,8 +29,7 @@ def versions(request, version_id):
         version_identifier = post['version_identifier']
 
         if 'package_id' not in post:
-            return get_version_package_id_not_provided_response(
-                version_identifier)
+            return get_version_package_id_not_provided_response()
 
         package_id = post['package_id']
         package = None
@@ -82,8 +82,7 @@ def versions(request, version_id):
                 return get_create_error_response('version',
                                                  error=dumps(error.messages),
                                                  status=400)
-            else:
-                return get_create_error_response('version', error)
+            return get_create_error_response('version', error)
 
         try:
             # Set the version as the default if it's the only existing version.
@@ -91,44 +90,65 @@ def versions(request, version_id):
                 package.default_version = version
                 package.full_clean()
                 package.save()
+            else:
+                package.date_modified = timezone.now()
         except DatabaseError as error:
             print(error)
 
         version_dict = model_to_dict(version)
-        version_dict['date_created'] = version_dict['date_created'].isoformat()
+        version_dict['date_created'] = version.date_created.isoformat()
 
-        return get_item_response(version)
+        return get_item_response(version_dict)
     # Requires version_id pretty url argument
-    if method == 'GET' or method == 'DELETE':
-        if not version_id:
-            return get_id_not_provided_response('version', method)
-
-        if method == 'GET':
-            version = None
+    elif method == 'GET':
+        version = None
+        if version_id:
             try:
                 version = Version.objects.get(id=version_id)
             except Version.DoesNotExist:
-                return get_item_not_found_response('version',
-                                                   version_id)
+                return get_item_not_found_response(version_id, 'version')
+        else:
+            parent_package_id = request.GET.get('parentPackageId')
+            version_identifier = request.GET.get('versionIdentifier')
+            if not parent_package_id:
+                return get_version_package_id_not_provided_response()
+            elif not version_identifier:
+                return get_version_version_identifier_not_provided_response()
 
-            version_dict = model_to_dict(version)
-            date_created = version_dict['date_created']
-            version_dict['date_created'] = date_created.isoformat()
-            return get_item_response(version_dict)
+            if version_identifier == 'default':
+                version = Package.objects.get(
+                    id=parent_package_id
+                ).default_version
+            else:
+                version = Version.objects.get(
+                    parent_package__id=parent_package_id,
+                    version_identifier=version_identifier,
+                )
 
-        elif method == 'DELETE':
-            if not request.user.is_authenticated:
-                return get_permission_denied_response('version', method)
+        if version.parent_package:
+            package_download = PackageDownload(
+                package=version.parent_package)
+            try:
+                package_download.full_clean()
+                package_download.save()
+            except DatabaseError as err:
+                print(err)
 
-            version = Version.objects.get(
-                version_identifier=version_identifier)
-            if not version:
-                return get_item_not_found_response('version',
-                                                   version_id)
-            elif version.author_id != request.user.id:
-                return get_item_not_owned_response('version',
-                                                   version_id)
-            # Fill in version deletion here.
+        version_dict = model_to_dict(version)
+        date_created = version.date_created.isoformat()
+        version_dict['date_created'] = date_created
+        return get_item_response(version_dict)
+    elif method == 'DELETE':
+        if not request.user.is_authenticated:
+            return get_permission_denied_response('version', method)
+
+        version = Version.objects.get(
+            version_identifier=version_identifier)
+        if not version:
+            return get_item_not_found_response('version', version_id)
+        elif version.author_id != request.user.id:
+            return get_item_not_owned_response('version', version_id)
+        # Fill in version deletion here.
 
     return get_method_not_supported_response('version', method)
 
