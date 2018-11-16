@@ -28,10 +28,10 @@ def versions(request, version_id):
 
         version_identifier = post['version_identifier']
 
-        if 'package_id' not in post:
+        if 'parentPackageId' not in post:
             return get_version_package_id_not_provided_response()
 
-        package_id = post['package_id']
+        package_id = post['parentPackageId']
         package = None
         try:
             package = Package.objects.get(id=package_id)
@@ -99,7 +99,7 @@ def versions(request, version_id):
         version_dict['date_created'] = version.date_created.isoformat()
 
         return get_item_response(version_dict)
-    # Requires version_id pretty url argument
+
     elif method == 'GET':
         version = None
         if version_id:
@@ -126,8 +126,7 @@ def versions(request, version_id):
                 )
 
         if version.parent_package:
-            package_download = PackageDownload(
-                package=version.parent_package)
+            package_download = PackageDownload(package=version.parent_package)
             try:
                 package_download.full_clean()
                 package_download.save()

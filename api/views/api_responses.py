@@ -60,7 +60,7 @@ def get_id_invalid_response(_type, _id):
 def get_version_package_id_not_provided_response():
     response = HttpResponse(
         dumps({
-            'error': 'There was no packageId provided when trying to ' +
+            'error': 'There was no parentPackageId provided when trying to ' +
                      'create, read, or delete a version.'
         }),
         status=400,
