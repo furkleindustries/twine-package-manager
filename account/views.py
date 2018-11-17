@@ -22,7 +22,9 @@ class AccountView(LoginRequiredMixin, generic.TemplateView):
             'form_method': 'PUT',
             'form_selector': '#accountUpdate',
             'packages': Package.objects.filter(author_id=user.id).order_by(
-                '-date_created'),
+                '-date_created'
+            ),
+
             'profile': get_object_or_404(Profile, user_id=user.id),
             'user': user,
         })

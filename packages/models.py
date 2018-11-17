@@ -10,7 +10,7 @@ from versions.models import Version
 
 
 def split_keywords(keywords):
-    return split(r',? *', keywords)
+    return split(r'(,\s*)|\s+', keywords)
 
 
 class AutoDateTimeField(models.DateTimeField):

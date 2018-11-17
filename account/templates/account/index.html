@@ -75,6 +75,7 @@
             <input
                 id="email"
                 name="email"
+                type="email"
                 value="{{ user.email }}"
             >
         </div>
@@ -89,13 +90,19 @@
             <select
                 id="email_visible"
                 name="email_visible"
-                value="{{ profile.email_visible }}"
+                value="{% if profile.email_visible %}True{% else %}False{% endif %}"
             >
-                <option data-db-value="true">
+                <option
+                    data-option-value="True"
+                    data-db-value="true"
+                >
                     True
                 </option>
 
-                <option data-db-value="false">
+                <option
+                    data-option-value="False"
+                    data-db-value="false"
+                >
                     False
                 </option>
             </select>
@@ -138,11 +145,17 @@
                 name="date_style"
                 value="{% if profile.date_style == 'DDMM' %}Day-month-year{% else %}Month-day-year{% endif %}"
             >
-                <option data-db-value="DDMM">
+                <option
+                    data-option-value="Day-month-year"
+                    data-db-value="DDMM"
+                >
                     Day-month-year
                 </option>
 
-                <option data-db-value="MMDD">
+                <option
+                    data-option-value="Month-day-year"
+                    data-db-value="MMDD"
+                >
                     Month-day-year
                 </option>
             </select>
@@ -158,11 +171,17 @@
                 name="time_style"
                 value="{% if profile.time_style == '24H' %}24-hour{% else %}12H{% endif %}"
             >
-                <option data-db-value="12H">
+                <option
+                    data-db-value="12H"
+                    data-option-value="12-hour"
+                >
                     12-hour
                 </option>
 
-                <option data-db-value="24H">
+                <option
+                    data-db-value="24H"
+                    data-option-value="24-hour"
+                >
                     24-hour
                 </option>
             </select>
