@@ -50,8 +50,8 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           ProfileIsOwnerOrReadOnly)
 
-    def get_object(self, pk):
-        return Profile.objects.get(user_id=pk)
+    def get_object(self):
+        return Profile.objects.get(user_id=self.kwargs['pk'])
 
 
 class VersionList(generics.ListCreateAPIView):

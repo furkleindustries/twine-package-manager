@@ -23,7 +23,7 @@ class PackageSerializer(serializers.ModelSerializer):
         request = self.context['request']
         include_versions = request.GET.get('includeVersions')
         if include_versions:
-            include_versions = split(r'[^,\s],?\s*', include_versions)
+            include_versions = split(r'(,\s*)|\s+', include_versions)
             return [
                 VersionSerializer(x).data for x in Version.objects.filter(
                     parent_package=package
