@@ -1,8 +1,9 @@
+from re import match
+
 from django.db import models
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-
-from re import match
+from django.utils import timezone
 
 
 class Profile(models.Model):
@@ -17,6 +18,8 @@ class Profile(models.Model):
         return self.homepage
 
     email_visible = models.BooleanField(default=False)
+
+    date_created = models.DateTimeField(default=timezone.now, editable=False)
 
     DAY_FIRST = 'DDMM'
     MONTH_FIRST = 'MMDD'

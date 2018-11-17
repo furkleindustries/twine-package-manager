@@ -63,8 +63,10 @@
                             if (tagName === 'select') {
                                 Array.prototype.slice.call(elem.querySelectorAll('option')).forEach(function each(option) {
                                     if (option.dataset.dbValue === String(value)) {
-                                        found = true;
-                                        elem.value = option.value;
+                                        if (option.dataset.optionValue) {
+                                            found = true;
+                                            elem.value = option.dataset.optionValue;
+                                        }
                                     }
                                 });
 

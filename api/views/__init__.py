@@ -17,3 +17,4 @@ from .login import *
 from .packages import *
 from .profiles import *
 from .versions import *
+from .drf_views import *
