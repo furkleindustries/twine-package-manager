@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
+from .forms import PackageCreateForm, PackageUpdateForm
 from packages.models import Package, PackageDownload
 from packages.search import packages_search_filter
 from versions.models import Version
@@ -46,13 +47,17 @@ class DetailView(generic.DetailView):
     context_object_name = 'package'
 
     def get_object(self):
-        return Package.objects.get(name=self.kwargs['name'])
+        unique_field = self.kwargs['unique_field']
+        if unique_field.isdigit():
+            return Package.objects.get(id=unique_field)
+
+        return Package.objects.get(name=unique_field)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = context['package']
-        downloads = PackageDownload.objects.filter(package=package).count()
-        versions = list(Version.objects.filter(parent_package=package))
+        downloads = package.packagedownload_set.count()
+        versions = package.version_set
         default_version = None
         for version in versions:
             if version == package.default_version:
@@ -71,26 +76,27 @@ class DetailView(generic.DetailView):
         return context
 
 
-class UpdateView(LoginRequiredMixin, generic.DetailView):
+class UpdateView(LoginRequiredMixin, generic.UpdateView):
     context_object_name = 'package'
     template_name = 'packages/edit.html'
+    model = Package
+    form_class = PackageUpdateForm
 
     def get_object(self):
-        return Package.objects.get(name=self.kwargs['name'])
+        unique_field = self.kwargs['unique_field']
+        if unique_field.isdigit():
+            return Package.objects.get(id=unique_field)
+
+        return Package.objects.get(name=unique_field)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = context['package']
-        downloads = PackageDownload.objects.filter(package=package).count()
-        package.keywords = ', '.join(package.keywords)
-        versions = Version.objects.filter(parent_package=package)
+        downloads = package.packagedownload_set.count()
+        versions = package.version_set
         versions = versions.order_by('-date_created')
         context.update({
             'downloads': downloads,
-            'form_after_submit_action': 'update_page',
-            'form_destination': '/api/packages/{}/'.format(package.id),
-            'form_method': 'PUT',
-            'form_selector': '#packageUpdate',
             'versions': versions,
         })
 
@@ -99,6 +105,13 @@ class UpdateView(LoginRequiredMixin, generic.DetailView):
 
 class CreateView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'packages/create.html'
+
+    def get_object(self):
+        unique_field = self.kwargs['unique_field']
+        if unique_field.isdigit():
+            return Package.objects.get(id=unique_field)
+
+        return Package.objects.get(name=unique_field)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -116,7 +129,11 @@ class DeleteView(LoginRequiredMixin, generic.DeleteView):
     template_name = 'packages/delete.html'
 
     def get_object(self):
-        return Package.objects.get(name=self.kwargs['name'])
+        unique_field = self.kwargs['unique_field']
+        if unique_field.isdigit():
+            return Package.objects.get(id=unique_field)
+
+        return Package.objects.get(name=unique_field)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -135,11 +152,18 @@ class DeleteView(LoginRequiredMixin, generic.DeleteView):
 class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
     model = Version
     template_name = 'packages/create_version.html'
+    context_object_name = 'package'
+
+    def get_object(self):
+        unique_field = self.kwargs['unique_field']
+        if unique_field.isdigit():
+            return Package.objects.get(id=unique_field)
+
+        return Package.objects.get(name=unique_field)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package_name = self.kwargs['name']
-        package = Package.objects.get(name=package_name)
         versions = list(Version.objects.filter(parent_package=package))
         versions.sort(
             # Sort them as lists of major-minor-patch versions, in (hopefully)

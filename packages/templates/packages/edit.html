@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block extraheaders %}
-<title>Twine Package Manager - Package ({{ package.name|default:'Error: no name' }})</title>
+<title>Twine Package Manager - Edit {{ package.name|default:'Error: no name' }} Package</title>
 <meta
     name="description"
     content="{% if package.package.description %}{{ package.package.description }}{% else %}A detailed view of {% if package.package.name %}the {{ package.package.name}}{% else %}a Twine{% endif %} package.{% endif %}"
@@ -14,190 +14,132 @@
 {% endblock %}
 
 {% block content %}
+<script src="/static/scripts/formSubmitToXHR.js"></script>
 <article>
-    <form id="packageUpdate">
+    <h1>Edit {{ package.name|default:'Error: no name' }} Package</h1>
+
+    <form
+        id="package_update"
+        method="PUT"
+        action="/api/packages/{{ package.name }}/"
+        onsubmit="return formSubmitToXHR(document.querySelector('#package_update'))"
+    >
         {% csrf_token %}
 
-        <h3>
-            {{ package.name }}
-        </h3>
-
-        <div>
-            <label for="description">
-                <em>
-                    Description
-                </em>
-            </label>
-
-            <input
-                id="description"
-                name="description"
-                value="{{ package.description }}"
-            >
-        </div>
-
-        <div>
-            <label>
-                <em>
-                    Downloads
-                </em>
-            </label>
-
-            <span>
-                {{ downloads }}
-            </span>
-        </div>
-
-        <div>
-            <label>
-                <em>
-                    Date created
-                </em>
-            </label>
-
-            <span
-                id="date_created"
-            >
-                {{ package.date_created }}
-            </span>
-        </div>
-
-        <div>
-            <label>
-                <em>
-                    Date modified
-                </em>
-            </label>
-
-            <span
-                id="date_created"
-            >
-                {{ package.date_created }}
-            </span>
-        </div>
-
-        <div>
-            <label for="homepage">
-                <em>
-                    Package homepage
-                </em>
-            </label>
-
-            <input
-                id="homepage"
-                name="homepage"
-                value="{{ package.homepage }}"
-            >
-        </div>
-
-        <div>
-            <label for="keywords">
-                <em>
-                    Keywords
-                </em>
-            </label>
-
-            <input
-                id="keywords"
-                name="keywords"
-                value="{{ package.keywords }}"
-            >
-        </div>
+        {{ form.as_p }}
 
         {% if versions %}
-        <div>
-            <label for="default_version">
-                <em>
+            <div>
+                <label for="default_version">
                     Default version
-                </em>
-            </label>
-
-            {% if versions|length > 1 %}
-                <select
-                    id="default_version"
-                    name="default_version"
-                >
-                    {% for version in versions %}
-                        <option {% if package.default_version == version %}selected{% endif %}>
-                            {{ version.version_identifier }}
-                        </option>
-                    {% endfor %}
-                </select>
-            {% else %}
-                <span>{{ package.default_version.version_identifier }}</span>
-            {% endif %}
-        </div>
+                </label>
+        
+                {% if versions|length > 1 %}
+                    <select
+                        id="default_version"
+                        name="default_version"
+                    >
+                        {% for version in versions %}
+                            <option {% if package.default_version == version %}selected{% endif %}>
+                                {{ version.version_identifier }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <span>{{ package.default_version.version_identifier }}</span>
+                {% endif %}
+            </div>
         {% endif %}
 
+        <input type="submit">
+
+        <ul class="error_container"></ul>
+    </form>
+    
+    <div>
+        <div>
+            <a href="/packages/{{ package.name }}/create_version/">
+                Create new version
+            </a>
+        </div>
+        
+        {% if versions %}
+            <ul>
+                {% for version in versions %}
+                    <li class="version">
+                        <strong
+                            class="versionIdentifier {% if package.default_version == version %} default{% endif %}"
+                            href="/versions/{{ version.id }}/"
+                            data-version-identifier="{{ version.version_identifier }}"
+                        >
+                                {{ version.version_identifier }}
+                        </strong>
+
+                        <a href="/versions/{{ version.id }}/edit/"
+                        >Edit</a>
+                            
+                        <a href="/versions/{{ version.id }}/delete/"
+                        >Delete</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% elif versions is not None %}
+            <p>
+                No versions created.
+            </p>
+        {% endif %}
+    </div>
+
+    <div>
         <label>
             <em>
-                Versions
+                Downloads
             </em>
         </label>
 
-        <div>
-            <div>
-                <a href="/packages/{{ package.name }}/create_version/">
-                    Create new version
-                </a>
-            </div>
+        <span
+            id="downloads"
+        >
+            {{ downloads }}
+        </span>
+    </div>
 
-            {% if versions %}
-                <ul>
-                    {% for version in versions %}
-                        <li class="version">
-                            <strong
-                                class="versionIdentifier {% if package.default_version == version %} default{% endif %}"
-                                href="/versions/{{ version.id }}/"
-                                data-version-identifier="{{ version.version_identifier }}"
-                            >
-                                {{ version.version_identifier }}
-                            </strong>
+    <div>
+        <label>
+            <em>
+                Date created
+            </em>
+        </label>
 
-                            <a href="/versions/{{ version.id }}/edit/"
-                            >Edit</a>
+        <span
+            id="date_created"
+        >
+            {{ package.date_created }}
+        </span>
+    </div>
 
-                            <a href="/versions/{{ version.id }}/delete/"
-                            >Delete</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% elif versions is not None %}
-                <p>
-                    No versions created.
-                </p>
-            {% endif %}
-        </div>
+    <div>
+        <label>
+            <em>
+                Date modified
+            </em>
+        </label>
 
-        <div>
-            <label for="tag">
-                Tag (to be used as you please)
-            </label>
-
-            <input
-                id="tag"
-                name="tag"
-                value="{{ package.tag }}"
-            >
-        </div>
-
-        <button id="submit" type="button">
-            Update package
-        </button>
-    </form>
+        <span
+            id="date_modified"
+        >
+            {{ package.date_modified }}
+        </span>
+    </div>
 
     <div>
         <a href="/packages/{{ package.name }}/delete/">
             Delete package
         </a>
     </div>
-
-    <div class="error"></div>
 </article>
 
 <script src="/static/scripts/packages/defaultVersionSelector.js" async defer></script>
 
 <script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></script>
-
-{% include 'form_script.html' %}
 {% endblock %}

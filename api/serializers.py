@@ -15,13 +15,20 @@ class PackageSerializer(serializers.ModelSerializer):
                   'default_version', 'keywords', 'tag', 'date_created',
                   'date_modified', 'versions', 'downloads')
 
+    name = serializers.ReadOnlyField()
+
     date_created = serializers.ReadOnlyField()
+
+    default_version = serializers.SerializerMethodField()
+
+    def get_default_version(self, package):
+        return package.default_version.version_identifier
 
     versions = serializers.SerializerMethodField(read_only=True)
 
     def get_versions(self, package):
         request = self.context['request']
-        include_versions = request.GET.get('includeVersions')
+        include_versions = request.GET.get('include_versions')
         if include_versions:
             include_versions = split(r'(,\s*)|\s+', include_versions)
             return [
@@ -42,7 +49,7 @@ class PackageSerializer(serializers.ModelSerializer):
     downloads = serializers.SerializerMethodField(read_only=True)
 
     def get_downloads(self, package):
-        return PackageDownload.objects.filter(package=package).count()
+        return package.packagedownload_set.count()
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -77,7 +84,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         internal_value = super(ProfileSerializer, self).to_internal_value(data)
         email = data.get('email')
-        print(data)
         internal_value.update({
             'email': email,
         })
