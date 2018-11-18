@@ -19,7 +19,7 @@ class AutoDateTimeField(models.DateTimeField):
 
 
 class Package(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, blank=False)
     author = models.ForeignKey(
         User,
         null=True,
@@ -38,8 +38,7 @@ class Package(models.Model):
 
     default_version = models.ForeignKey(
         Version,
-        blank=True,
-        default='',
+        default=None,
         null=True,
         on_delete=models.SET_DEFAULT,
     )
