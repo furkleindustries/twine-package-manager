@@ -22,7 +22,10 @@ class PackageSerializer(serializers.ModelSerializer):
     default_version = serializers.SerializerMethodField()
 
     def get_default_version(self, package):
-        return package.default_version.version_identifier
+        if package.default_version:
+            return package.default_version.version_identifier
+
+        return None
 
     versions = serializers.SerializerMethodField(read_only=True)
 

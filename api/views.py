@@ -92,6 +92,30 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
         self.perform_update(serializer)
         return response.Response(serializer.data)
 
+    def finalize_response(self, request, response, *args, **kwargs):
+        if request.method == 'GET' and request.GET.get('include_versions'):
+            print(vars(response.data))
+            # Register downloads of each fetched version.
+            for version in response.data['versions']:
+                if version['parent_package']:
+                    parent_package = None
+                    try:
+                        parent_package = Package.objects.get(
+                            id=version['parent_package']
+                        )
+                    except Package.DoesNotExist:
+                        pass
+
+                    if parent_package:
+                        dl = PackageDownload.objects.create(
+                            package=parent_package
+                        )
+
+                        dl.full_clean()
+                        dl.save()
+
+        return super().finalize_response(request, response, *args, **kwargs)
+
 
 class ProfileList(generics.ListAPIView):
     queryset = Profile.objects.all()
@@ -114,21 +138,35 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
         return Profile.objects.get(user_id=self.kwargs['user_id'])
 
 
-class VersionList(generics.ListCreateAPIView):
+class VersionDetail(generics.RetrieveDestroyAPIView):
     queryset = Version.objects.all()
     serializer_class = VersionSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           VersionIsOwnerOrReadOnly)
 
-    pagination_class = PageSizeAwareCursorPagination
+    def get_object(self):
+        field = self.kwargs['field']
 
-    filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('id',)
-    ordering = ('-id',)
+        version = None
+        if field.isdigit():
+            version = self.queryset.get(id=field)
+        else:
+            package_id = self.request.GET.get('package_id')
+            if not package_id:
+                raise Exception('The package_id argument must be provided if ' +
+                                'the version is being searched by semver ' +
+                                'identifier.')
+
+            version = self.queryset.get(
+                version_identifier=field, parent_package__id=package_id
+            )
+
+        return version
 
     def finalize_response(self, request, response, *args, **kwargs):
-        # Register downloads of each fetched version.
-        for version in response.data['results']:
+        if request.method == 'GET':
+            # Register a download of the fetched version.
+            version = response.data
             if version['parent_package']:
                 parent_package = None
                 try:
@@ -144,35 +182,3 @@ class VersionList(generics.ListCreateAPIView):
                     dl.save()
 
         return super().finalize_response(request, response, *args, **kwargs)
-
-
-class VersionDetail(generics.RetrieveDestroyAPIView):
-    queryset = Version.objects.all()
-    serializer_class = VersionSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          VersionIsOwnerOrReadOnly)
-
-    def get_object(self):
-        field = self.kwargs['field']
-
-        version = None
-        if field.isdigit():
-            version = self.queryset.get(id=field)
-
-        package_id = self.request.GET.get('package_id')
-        if not package_id:
-            raise Exception('The package_id argument must be provided if ' +
-                            'the version is being searched by semver ' +
-                            'identifier.')
-
-        version = self.queryset.get(
-            version_identifier=field, parent_package__id=package_id
-        )
-
-        parent_package = version.parent_package
-        if parent_package:
-            dl = PackageDownload.objects.create(package=parent_package)
-            dl.full_clean()
-            dl.save()
-
-        return version

@@ -1,7 +1,7 @@
 from rest_framework import pagination, response
 
 
-DEFAULT_PAGE_SIZE = 1
+DEFAULT_PAGE_SIZE = 10
 MAX_PAGE_SIZE = 100
 PAGE_SIZE_PARAM = 'page_size'
 

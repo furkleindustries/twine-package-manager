@@ -2,8 +2,7 @@ from django.urls import path, re_path
 
 from .views import (
     PackageList, PackageDetail, PackageTopDownloads,
-    PackagesMostRecentlyModified, ProfileList, ProfileDetail, VersionList,
-    VersionDetail,
+    PackagesMostRecentlyModified, ProfileList, ProfileDetail, VersionDetail,
 )
 
 urlpatterns = [
@@ -20,7 +19,6 @@ urlpatterns = [
     re_path(r'^profiles/(?P<user_id>\d+)?/?$', ProfileDetail.as_view(),
             name='Profiles detail'),
 
-    re_path(r'^versions/?$', VersionList.as_view(), name='Versions list'),
     re_path(r'^versions/(?P<field>[^/]+)?/?$', VersionDetail.as_view(),
             name='Versions detail'),
 ]
