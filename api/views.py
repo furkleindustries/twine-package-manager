@@ -7,6 +7,7 @@ from api.serializers import (
     PackageSerializer, ProfileSerializer, VersionSerializer
 )
 
+from .filters import PackageSearchFilter
 from packages.models import Package, DeletedPackage, PackageDownload
 from profiles.models import Profile
 from versions.models import Version
@@ -33,6 +34,13 @@ class PackageList(generics.ListCreateAPIView):
     filter_backends = (filters.OrderingFilter,)
     ordering_fields = ('id', 'name')
     ordering = ('-id',)
+
+
+class PackageSearch(generics.ListAPIView):
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer
+    pagination_class = PageSizeAwareOffsetPagination
+    filter_backends = (PackageSearchFilter,)
 
 
 class PackageTopDownloads(generics.ListAPIView):

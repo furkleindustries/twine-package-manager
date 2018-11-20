@@ -1,12 +1,14 @@
 from django.urls import path, re_path
 
 from .views import (
-    PackageList, PackageDetail, PackageTopDownloads,
+    PackageList, PackageSearch, PackageDetail, PackageTopDownloads,
     PackagesMostRecentlyModified, ProfileList, ProfileDetail, VersionDetail,
 )
 
 urlpatterns = [
     re_path(r'^packages/?$', PackageList.as_view(), name='Packages list'),
+    re_path(r'^packages_search/?$', PackageSearch.as_view(),
+            name='Packages search'),
     re_path(r'^packages_top_downloads/?', PackageTopDownloads.as_view(),
             name='Packages top downloads'),
     re_path(r'^packages_recently_modified/?',
