@@ -9,10 +9,63 @@
 {% endblock %}
 
 {% block content %}
+<script src="/static/scripts/formSubmitToXHR.js"></script>
 <article>
-    <h2>
-        {{ user.username|default:"Error: user not found" }}
-    </h2>
+    <h1>
+        Edit {{ user.username }} profile
+    </h1>
+
+    <form
+        class="account_update"
+        method="PUT"
+        action="/api/profiles/{{ profile.id }}"
+        onsubmit="return formSubmitToXHR(document.querySelector('.account_update'))"
+    >
+        {% csrf_token %}
+
+        {{ account_form.as_p }}
+        {{ profile_form.as_p }}
+        
+        <input type="submit" value="Update profile">
+
+        <ul class="error_container"></ul>
+    </form>
+        
+    <div>
+        <h4>
+            <em>
+                Packages
+            </em>
+        </h4>
+
+        <ul>
+            {% for package in packages %}
+                <li>
+                    <strong>{{ package.name }}</strong>
+
+                    <a
+                        class="editPackage"
+                        href="/packages/{{ package.name }}/edit/"
+                    >Edit</a>
+
+                    <a
+                        class="deletePackage"
+                        href="/packages/{{ package.name }}/delete/"
+                    >Delete</a>
+                </li>
+            {% empty %}
+                No packages yet!
+            {% endfor %}
+        </ul>
+    </div>
+
+    <a href="/packages/create/">
+        Create new package
+    </a>
+
+    <div>
+        <a href="/account/changePassword/">Change password</a>
+    </div>
 
     <div>
         <h4>
@@ -60,176 +113,6 @@
                 {% endif %}
             {% endif %}
         </time>
-    </div>
-
-    <form id="accountUpdate">
-        {% csrf_token %}
-
-        <div>
-            <label for="email">
-                <em>
-                    E-mail
-                </em>
-            </label>
-
-            <input
-                id="email"
-                name="email"
-                type="email"
-                value="{{ user.email }}"
-            >
-        </div>
-
-        <div>
-            <label for="email_visible">
-                <em>
-                    E-mail visible to others
-                </em>
-            </label>
-
-            <select
-                id="email_visible"
-                name="email_visible"
-                value="{% if profile.email_visible %}True{% else %}False{% endif %}"
-            >
-                <option
-                    data-option-value="True"
-                    data-db-value="true"
-                >
-                    True
-                </option>
-
-                <option
-                    data-option-value="False"
-                    data-db-value="false"
-                >
-                    False
-                </option>
-            </select>
-        </div>
-
-        <div>
-            <label for="homepage">
-                <em>
-                    Homepage
-                </em>
-            </label>
-
-            <input
-                id="homepage"
-                name="homepage"
-                value="{{ profile.homepage }}"
-            >
-        </div>
-
-        <div>
-            <label for="description">
-                <em>
-                    Description
-                </em>
-            </label>
-
-            <textarea
-                id="description"
-                name="description"
-            >{{ profile.description }}</textarea>
-        </div>
-
-        <div>
-            <label for="date_style">
-                Date style
-            </label>
-
-            <select
-                id="date_style"
-                name="date_style"
-                value="{% if profile.date_style == 'DDMM' %}Day-month-year{% else %}Month-day-year{% endif %}"
-            >
-                <option
-                    data-option-value="Day-month-year"
-                    data-db-value="DDMM"
-                >
-                    Day-month-year
-                </option>
-
-                <option
-                    data-option-value="Month-day-year"
-                    data-db-value="MMDD"
-                >
-                    Month-day-year
-                </option>
-            </select>
-        </div>
-
-        <div>
-            <label for="time_style">
-                Time style
-            </label>
-
-            <select
-                id="time_style"
-                name="time_style"
-                value="{% if profile.time_style == '24H' %}24-hour{% else %}12H{% endif %}"
-            >
-                <option
-                    data-db-value="12H"
-                    data-option-value="12-hour"
-                >
-                    12-hour
-                </option>
-
-                <option
-                    data-db-value="24H"
-                    data-option-value="24-hour"
-                >
-                    24-hour
-                </option>
-            </select>
-        </div>
-
-        <button id="submit" type="button">
-            Update profile
-        </button>
-
-        <div>
-            <h4>
-                <em>
-                    Packages
-                </em>
-            </h4>
-
-            <ul>
-                {% for package in packages %}
-                    <li>
-                        <strong>{{ package.name }}</strong>
-
-                        <a
-                            class="editPackage"
-                            href="/packages/{{ package.name }}/edit/"
-                        >Edit</a>
-
-                        <a
-                            class="deletePackage"
-                            href="/packages/{{ package.name }}/delete/"
-                        >Delete</a>
-                    </li>
-                {% empty %}
-                    No packages yet!
-                {% endfor %}
-            </ul>
-        </div>
-
-        <a href="/packages/create/">
-            Create new package
-        </a>
-
-        <div class="error"></div>
-    </form>
-
-    {% include 'form_script.html' %}
-
-    <div>
-        <a href="/account/changePassword/">Change password</a>
     </div>
 </article>
 

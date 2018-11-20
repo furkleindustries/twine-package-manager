@@ -1,12 +1,17 @@
+from json import dumps
+
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import response
+from django.shortcuts import redirect, render
 from django.views import generic
 
 from packages.models import Package
 from profiles.models import Profile
+
+from .forms import AccountUpdateForm, ProfileUpdateForm
 
 
 class AccountView(LoginRequiredMixin, generic.TemplateView):
@@ -15,17 +20,16 @@ class AccountView(LoginRequiredMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         user = self.request.user
+        profile = Profile.objects.get(user=user)
         context = super().get_context_data(**kwargs)
         context.update({
-            'form_after_submit_action': 'update_page',
-            'form_destination': '/api/profiles/{}/'.format(user.id),
-            'form_method': 'PUT',
-            'form_selector': '#accountUpdate',
-            'packages': Package.objects.filter(author_id=user.id).order_by(
-                '-date_created'
-            ),
+            'account_form': AccountUpdateForm(instance=user),
+            'profile_form': ProfileUpdateForm(instance=profile),
+            'packages': Package.objects.filter(
+                author_id=user.id
+            ).order_by('-date_created'),
 
-            'profile': get_object_or_404(Profile, user_id=user.id),
+            'profile': profile,
             'user': user,
         })
 

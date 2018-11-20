@@ -137,6 +137,27 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         return Profile.objects.get(user_id=self.kwargs['user_id'])
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        profile = self.get_object()
+
+        updated_data = request.data.copy()
+
+        email = updated_data.pop('email')[0]
+
+        serializer = self.get_serializer(profile, data=updated_data,
+                                         partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        # For some reason I don't quite understand this doesn't work if
+        # performed before the serializer update.
+        profile.user.email = email
+        profile.user.full_clean()
+        profile.user.save()
+
+        return response.Response(serializer.data)
+
 
 class VersionDetail(generics.RetrieveDestroyAPIView):
     queryset = Version.objects.all()
@@ -153,8 +174,8 @@ class VersionDetail(generics.RetrieveDestroyAPIView):
         else:
             package_id = self.request.GET.get('package_id')
             if not package_id:
-                raise Exception('The package_id argument must be provided if ' +
-                                'the version is being searched by semver ' +
+                raise Exception('The package_id argument must be provided ' +
+                                'if the version is being searched by semver ' +
                                 'identifier.')
 
             version = self.queryset.get(
