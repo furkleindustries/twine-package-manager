@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load escape_quotation_marks %}
+
 {% block extraheaders %}
 <title>Twine Package Manager - Search {{ query }}</title>
 <meta
@@ -17,13 +19,13 @@
                         {% include "packages/package.html" %}
                     {% endwith %}
                 {% empty %}
-                        No packages match the query "{{ query }}".
+                    No packages match the query "{{ query }}".
                 {% endfor %}
             </ul>
 
             <script>
             /* Set the search bar value to the performed query. */
-            document.querySelector('.searchBar').value = '{{ query|default:"" }}';
+            document.querySelector('.searchBar').value = '{{ query|escape_quotation_marks|safe }}';
             </script>
         {% else %}
             <p>

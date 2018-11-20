@@ -11,7 +11,7 @@ class Profile(models.Model):
     homepage = models.URLField(blank=True, default='')
 
     def trimmed_homepage(self):
-        _match = match(r'^(?:https://(?:www.)*)*(.+)$', self.homepage)
+        _match = match(r'^(?:https?://(?:www.)*)*(.+)$', self.homepage)
         if _match and _match.group(1):
             return _match.group(1)
 
@@ -56,6 +56,8 @@ class Profile(models.Model):
         return self.user.username
 
 
+# These two triggers automatically create a profile when a User model is
+# created.
 @receiver(models.signals.post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

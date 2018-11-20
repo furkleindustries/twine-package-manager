@@ -35,24 +35,18 @@ function formSubmitToXHR(form) {
                 window.location.reload();
             }
         } else if (errorContainer) {
-            var errors;
-            try {
-                errors = JSON.parse(responseObj.error);
-            } catch (e) {}
-
-            if (!Array.isArray(errors)) {
-                if (responseObj.error) {
-                    errors = [ responseObj.error, ];
-                } else {
-                    errors = [];
-                }
-            }
-
-            errors.forEach(function each(err) {
+            var errKeys = Object.keys(responseObj);
+            for (var ii = 0; ii < errKeys.length; ii += 1) {
                 var li = document.createElement('li');
-                li.textContent = err;
-                error.appendChild(li);
-            });
+                var errs = responseObj[errKeys[ii]];
+                var text = errKeys[ii] + ':\n';
+                for (var jj = 0; jj < errs.length; jj += 1) {
+                    text += responseObj[errKeys[ii]][jj] + '\n';
+                }
+
+                li.textContent = text;
+                errorContainer.appendChild(li);
+            }
 
             /* Clear the error after a timeout. */
             setTimeout(function timeout() {

@@ -1,4 +1,4 @@
-from re import split 
+from re import split
 
 from django.contrib.auth.models import User
 from rest_framework import serializers
@@ -66,8 +66,14 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     ''' Gets the e-mail from the underlying User object. '''
     def get_email(self, profile):
-        if profile.email_visible:
-            return profile.user.email
+        request = self.context['request']
+        if request.method == 'GET':
+            if profile.user == request.user or profile.email_visible:
+                return profile.user.email
+
+            return None
+
+        return profile.user.email
 
     name = serializers.SerializerMethodField(read_only=True)
 
