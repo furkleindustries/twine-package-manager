@@ -19,10 +19,10 @@
     <h1>Edit {{ package.name|default:'Error: no name' }} Package</h1>
 
     <form
-        id="package_update"
+        class="package_update"
         method="PUT"
         action="/api/packages/{{ package.name }}/"
-        onsubmit="return formSubmitToXHR(document.querySelector('#package_update'))"
+        onsubmit="return formSubmitToXHR(document.querySelector('.package_update'))"
     >
         {% csrf_token %}
 
@@ -30,11 +30,11 @@
 
         {% if versions %}
             <div>
-                <label for="default_version">
-                    Default version
-                </label>
-        
                 {% if versions|length > 1 %}
+                    <label for="default_version">
+                        Default version
+                    </label>
+
                     <select
                         id="default_version"
                         name="default_version"
@@ -72,7 +72,7 @@
                             href="/versions/{{ version.id }}/"
                             data-version-identifier="{{ version.version_identifier }}"
                         >
-                                {{ version.version_identifier }}
+                            {{ version.version_identifier }}
                         </strong>
 
                         <a href="/versions/{{ version.id }}/edit/"

@@ -102,40 +102,28 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
         else:
             return Package.objects.get(name=field)
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+    def perform_update(self, serializer):
         package = self.get_object()
 
-        if request.data.get('default_version'):
+        default_version = None
+        if serializer.validated_data.get('default_version'):
             default_version = package.version_set.get(
-                version_identifier=request.data['default_version']
+                version_identifier=serializer.validated_data['default_version']
             )
 
-            package.default_version = default_version
+        keywords = split_keywords(serializer.validated_data['keywords'][0])
+        keywords = list(map(lambda x: x.lower(), keywords))
+        serializer.validated_data['keywords'] = keywords
 
-        keywords = split_keywords(request.data['keywords'].lower())
-        package.keywords = keywords
+        if default_version:
+            actual_version = Version.objects.get(
+                parent_package=package,
+                version_identifier=default_version,
+            )
 
-        package.full_clean()
-        package.save()
+            serializer.validated_data['default_version'] = actual_version
 
-        updated_data = request.data.copy()
-        if package.default_version:
-            updated_data['default_version'] = package.default_version.id
-
-        updated_data['keywords'] = keywords
-
-        serializer = self.get_serializer(package, data=updated_data,
-                                         partial=partial)
-
-        try:
-            serializer.is_valid(raise_exception=True)
-        except Exception as err:
-            print(err)
-            raise err
-
-        self.perform_update(serializer)
-        return response.Response(serializer.data)
+        super(PackageDetail, self).perform_update(serializer)
 
     def finalize_response(self, request, response, *args, **kwargs):
         if request.method == 'GET' and request.GET.get('include_versions'):
@@ -168,16 +156,16 @@ class PackageCreateVersion(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,
                           PackageIsOwnerOrReadOnly)
 
-    def perform_create(self, serializer):
+    def get_object(self):
         field = self.kwargs['field']
-        package = None
         if field.isdigit():
-            package = Package.objects.get(id=field)
+            return Package.objects.get(id=field)
         else:
-            package = Package.objects.get(name=field)
+            return Package.objects.get(name=field)
 
+    def perform_create(self, serializer):
+        package = self.get_object()
         serializer.validated_data['parent_package'] = package
-
         super(PackageCreateVersion, self).perform_create(serializer)
 
 
