@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Version(models.Model):
-    version_identifier = models.CharField(max_length=255)
+    version_identifier = models.CharField(max_length=128)
 
     author = models.ForeignKey(
         User,
@@ -18,11 +18,9 @@ class Version(models.Model):
 
     parent_package = models.ForeignKey(
         'packages.Package',
-        on_delete=models.SET_NULL,
         null=True,
+        blank=False,
+        on_delete=models.SET_NULL,
     )
 
     date_created = models.DateTimeField(default=timezone.now, editable=False)
-
-    def __str__(self):
-        return '{} - {}'.format(self.parent_package, self.version_identifier)

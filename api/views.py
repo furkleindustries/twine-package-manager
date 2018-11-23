@@ -1,3 +1,5 @@
+from json import dumps
+
 from django.db.models import Count
 from django.forms.models import model_to_dict
 
@@ -8,7 +10,10 @@ from api.serializers import (
 )
 
 from .filters import PackageSearchFilter
-from packages.models import Package, DeletedPackage, PackageDownload
+from packages.models import (
+    Package, DeletedPackage, PackageDownload, split_keywords
+)
+
 from profiles.models import Profile
 from versions.models import Version
 
@@ -17,8 +22,7 @@ from .pagination import (
 )
 
 from .permissions import (
-    PackageIsOwnerOrReadOnly,
-    ProfileIsOwnerOrReadOnly,
+    PackageIsOwnerOrReadOnly, ProfileIsOwnerOrReadOnly,
     VersionIsOwnerOrReadOnly,
 )
 
@@ -32,8 +36,8 @@ class PackageList(generics.ListCreateAPIView):
     pagination_class = PageSizeAwareCursorPagination
 
     filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('id', 'name')
-    ordering = ('-id',)
+    ordering_fields = ('id', 'name', 'date_created')
+    ordering = ('-date_created',)
 
 
 class PackageSearch(generics.ListAPIView):
@@ -41,6 +45,23 @@ class PackageSearch(generics.ListAPIView):
     serializer_class = PackageSerializer
     pagination_class = PageSizeAwareOffsetPagination
     filter_backends = (PackageSearchFilter,)
+
+
+class PackageKeywordList(generics.ListAPIView):
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer
+    pagination_class = PageSizeAwareOffsetPagination
+
+    filter_backends = (filters.OrderingFilter,)
+    ordering_fields = ('id', 'name', 'date_modified', 'downloads',)
+    ordering = ('-downloads',)
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            keywords__contains=[self.kwargs['keyword'].lower()]
+        ).annotate(
+            downloads=Count('packagedownload')
+        )
 
 
 class PackageTopDownloads(generics.ListAPIView):
@@ -83,20 +104,36 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        default_version = instance.version_set.get(
-            version_identifier=request.data['default_version']
-        )
+        package = self.get_object()
 
-        instance.default_version = default_version
-        instance.save()
+        if request.data.get('default_version'):
+            default_version = package.version_set.get(
+                version_identifier=request.data['default_version']
+            )
+
+            package.default_version = default_version
+
+        keywords = split_keywords(request.data['keywords'].lower())
+        package.keywords = keywords
+
+        package.full_clean()
+        package.save()
 
         updated_data = request.data.copy()
-        updated_data['default_version'] = instance.default_version.id
+        if package.default_version:
+            updated_data['default_version'] = package.default_version.id
 
-        serializer = self.get_serializer(instance, data=updated_data,
+        updated_data['keywords'] = keywords
+
+        serializer = self.get_serializer(package, data=updated_data,
                                          partial=partial)
-        serializer.is_valid(raise_exception=True)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as err:
+            print(err)
+            raise err
+
         self.perform_update(serializer)
         return response.Response(serializer.data)
 
@@ -123,6 +160,25 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
                         dl.save()
 
         return super().finalize_response(request, response, *args, **kwargs)
+
+
+class PackageCreateVersion(generics.CreateAPIView):
+    queryset = Package.objects.all()
+    serializer_class = VersionSerializer
+    permission_classes = (permissions.IsAuthenticated,
+                          PackageIsOwnerOrReadOnly)
+
+    def perform_create(self, serializer):
+        field = self.kwargs['field']
+        package = None
+        if field.isdigit():
+            package = Package.objects.get(id=field)
+        else:
+            package = Package.objects.get(name=field)
+
+        serializer.validated_data['parent_package'] = package
+
+        super(PackageCreateVersion, self).perform_create(serializer)
 
 
 class ProfileList(generics.ListAPIView):

@@ -16,11 +16,11 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = None
-with open('secrets/django_secret_key') as f:
+with open(os.path.join(BASE_DIR, 'secrets', 'django_secret_key')) as f:
     SECRET_KEY = f.read().strip()
 
 POSTGRES_DATABASE_PASSWORD = None
-with open('secrets/postgres_db_password') as f:
+with open(os.path.join(BASE_DIR, 'secrets', 'postgres_db_password')) as f:
     POSTGRES_DATABASE_PASSWORD = f.read().strip()
 
 # Quick-start development settings - unsuitable for production

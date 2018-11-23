@@ -68,15 +68,13 @@
 
     <section>
         <h3>
-            Latest packages
+            Newest packages
         </h3>
 
         <ul>
-            {% with as_list=True %}
-                {% for package in latest_packages %}
-                    {% include "packages/package.html" %}
-                {% endfor %}
-            {% endwith %}
+            {% for package in newest_packages %}
+                {% include "packages/package.html" %}
+            {% endfor %}
         </ul>
     </section>
 </article>
