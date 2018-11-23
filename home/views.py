@@ -13,7 +13,7 @@ class IndexView(generic.TemplateView):
             'keyword_links': True,
             'package_links': True,
             # Get the last five published packages.
-            'latest_packages': Package.objects.order_by('-date_created')[:5],
+            'newest_packages': Package.objects.order_by('-date_created')[:5],
         })
 
         return context

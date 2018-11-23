@@ -9,8 +9,15 @@
 {% endblock %}
 
 {% block content %}
+<script src="/static/scripts/formSubmitToXHR.js"></script>
+
 <article>
-    <form id="versionCreate">
+    <form
+        class="version_create"
+        method="POST"
+        action="/api/packages/{{ package.id }}/create_version/"
+        onsubmit="return formSubmitToXHR(document.querySelector('.version_create'));"
+    >
         {% csrf_token %}
 
         <h3>
@@ -24,12 +31,6 @@
             intended to make it so that authors can rely on a certain version
             of a package always functioning identically.
         </p>
-
-        <input
-            hidden
-            name="parentPackageId"
-            value="{{ package.id }}"
-        >
 
         <div>
             <label for="version_identifier">
@@ -71,7 +72,6 @@
             </div>
         {% endif %}
 
-
         <div>
             <label for="description">
                 <em>
@@ -112,15 +112,11 @@
             ></textarea>
         </div>
 
-        <button id="submit" type="button">
-            Create version
-        </button>
+        <input type="submit" type="button" value="Create version">
 
-        <ul class="error"></ul>
+        <ul class="error_container"></ul>
     </form>
 </article>
-
-{% include 'form_script.html' %}
 
 <script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></script>
 

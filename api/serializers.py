@@ -33,7 +33,7 @@ class PackageSerializer(serializers.ModelSerializer):
         request = self.context['request']
         include_versions = request.GET.get('include_versions')
         if include_versions:
-            include_versions = split(r'(,\s*)|\s+', include_versions)
+            include_versions = split(r'(?:,\s*)|\s+', include_versions)
             return [
                 VersionSerializer(x).data for x in Version.objects.filter(
                     parent_package=package
@@ -46,7 +46,7 @@ class PackageSerializer(serializers.ModelSerializer):
 
         else:
             return [x['version_identifier'] for x in Version.objects.filter(
-                parent_package=package
+                parent_package=package,
             ).values('version_identifier')]
 
     downloads = serializers.SerializerMethodField(read_only=True)

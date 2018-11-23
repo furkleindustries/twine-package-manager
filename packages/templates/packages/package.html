@@ -3,151 +3,153 @@
 {% else %}
 <div>
 {% endif %}
-    <h3>
-        {% if package_links %}
-            {% if package.owner == request.user %}
-                <a href="/packages/{{ package.name }}/edit">{{ package.name }}</a>
+    <article>
+        <h1>
+            {% if package_links %}
+                {% if package.owner == request.user %}
+                    <a href="/packages/{{ package.name }}/edit">{{ package.name }}</a>
+                {% else %}
+                    <a href="/packages/{{ package.name }}">{{ package.name }}</a>
+                {% endif %}
             {% else %}
-                <a href="/packages/{{ package.name }}">{{ package.name }}</a>
+                {{ package.name }}
             {% endif %}
-        {% else %}
-            {{ package.name }}
+        </h3>
+
+        {% if request.user == package.owner %}
+        <a href="/packages/{{ package.name }}/edit/">Edit this package</a>
         {% endif %}
-    </h3>
-    
-    {% if request.user == package.owner %}
-    <a href="/packages/{{ package.name }}/edit/">Edit this package</a>
-    {% endif %}
 
-    {% if package.author and show_author %}
-        <div>
-            {% if show_labels %}
-                <h4>
-                    <em>
-                        Author
-                    </em>
-                </h4>
-            {% endif %}
-
-            <p>
-                <a href="/profiles/{{ author.user_id }}">
-                    {{ package.author.username }}
-                </a>
-            </p>
-        </div>
-    {% endif %}
-
-    {% if package.owner %}
-        <div>
-            {% if show_labels %}
-                <h4>
-                    <em>
-                        Owner
-                    </em>
-                </h4>
-            {% endif %}
-
-            <p>
-                {% if not show_labels %}
-                    By
+        {% if package.author and show_author %}
+            <div>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Author
+                        </em>
+                    </h4>
                 {% endif %}
 
-                <a href="/profiles/{{ owner.id }}">
-                    {{ package.owner.username }}
-                </a>
-            </p>
-        </div>
-    {% endif %}
+                <p>
+                    <a href="/profiles/{{ author.user_id }}">
+                        {{ package.author.username }}
+                    </a>
+                </p>
+            </div>
+        {% endif %}
 
-    {% if package.description %}
-        <div>
-            {% if show_labels %}
-                <h4>
-                    <em>
-                        Description
-                    </em>
-                </h4>
-            {% endif %}
-
-            <p>
-                {{ package.description }}
-            </p>
-        </div>
-    {% endif %}
-
-    {% if downloads is not None and show_downloads %}
-        <div>
-            {% if show_labels %}
-            <h4>
-                <em>
-                    Downloads
-                </em>
-            </h4>
-            {% endif %}
-
-            <p>
-                {{ downloads }}
-            </p>
-        </div>
-    {% endif %}
-
-    {% if versions %}
-        <div>
-            <h4>
-                <em>
-                    Versions
-                </em>
-            </h4>
-
-            <a href="/packages/{{ package.name }}/create_version/">
-                Create new version
-            </a>
-
-            <ul>
-                {% if default_version %}
-                    <li>
-                        <a href="/versions{{ default_version.id }}/">
-                            <strong>
-                                {{ default_version.version_identifier }}
-                            </strong>
-                        </a>
-                    </li>
+        {% if package.owner %}
+            <div>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Owner
+                        </em>
+                    </h4>
                 {% endif %}
 
-                {% for version in versions %}
-                    {% if version != default_version %}
+                <p>
+                    {% if not show_labels %}
+                        By
+                    {% endif %}
+
+                    <a href="/profiles/{{ owner.id }}">
+                        {{ package.owner.username }}
+                    </a>
+                </p>
+            </div>
+        {% endif %}
+
+        {% if package.description %}
+            <div>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Description
+                        </em>
+                    </h4>
+                {% endif %}
+
+                <p>
+                    {{ package.description }}
+                </p>
+            </div>
+        {% endif %}
+
+        {% if downloads is not None and show_downloads %}
+            <div>
+                {% if show_labels %}
+                <h4>
+                    <em>
+                        Downloads
+                    </em>
+                </h4>
+                {% endif %}
+
+                <p>
+                    {{ downloads }}
+                </p>
+            </div>
+        {% endif %}
+
+        {% if package.keywords %}
+            <div>
+                {% if show_labels %}
+                    <h4>
+                        <em>
+                            Keywords
+                        </em>
+                    </h4>
+                {% endif %}
+
+                {% for keyword in package.keywords %}
+                    {% if keyword_links %}<a href="/packages/keywords/{{ keyword }}/">{{ keyword }}</a>{% else %}<span>{{ keyword }}</span>{% endif %}{% if forloop.revcounter != 1 %}, {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if versions %}
+            <div>
+                <h4>
+                    <em>
+                        Versions
+                    </em>
+                </h4>
+
+                <a href="/packages/{{ package.name }}/create_version/">
+                    Create new version
+                </a>
+
+                <ul>
+                    {% if default_version %}
                         <li>
-                            <a href="/versions/{{ version.id }}/">
-                                {{ version.version_identifier }}
+                            <a href="/versions{{ default_version.id }}/">
+                                <strong>
+                                    {{ default_version.version_identifier }}
+                                </strong>
                             </a>
                         </li>
                     {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-    {% elif versions is not None %}
-        <div>
-            <p>
-                No versions created.
-            </p>
-        </div>
-    {% endif %}
 
-    {% if package.keywords %}
-        <div>
-            {% if show_labels %}
-                <h4>
-                    <em>
-                        Keywords
-                    </em>
-                </h4>
-            {% endif %}
-
-            {% for keyword in package.keywords %}
-                {% if keyword_links %}<a href="/packages/keywords/{{ keyword }}/">{{ keyword }}</a>{% else %}<span>{{ keyword }}</span>{% endif %}{% if forloop.revcounter != 1 %}, {% endif %}
-            {% endfor %}
-        </div>
-    {% endif %}
+                    {% for version in versions %}
+                        {% if version != default_version %}
+                            <li>
+                                <a href="/versions/{{ version.id }}/">
+                                    {{ version.version_identifier }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% elif versions is not None %}
+            <div>
+                <p>
+                    No versions created.
+                </p>
+            </div>
+        {% endif %}
+    </article>
 {% if as_list %}
 </li>
 {% else %}

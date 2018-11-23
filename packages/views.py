@@ -16,6 +16,36 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         return Package.objects.order_by('-date_created')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'as_list': True,
+            'keyword_links': True,
+        })
+
+        return context
+
+
+class KeywordView(generic.ListView):
+    template_name = 'packages/keywords.html'
+    context_object_name = 'packages'
+
+    def get_queryset(self):
+        packages = Package.objects.all()
+        keyword = self.kwargs['keyword']
+        return packages.filter(keywords__icontains=keyword).order_by(
+            'packagedownload'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'as_list': True,
+            'keyword_links': True,
+        })
+
+        return context
+
 
 class SearchView(generic.ListView):
     template_name = 'packages/search.html'
@@ -36,6 +66,8 @@ class SearchView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
+            'as_list': True,
+            'keyword_links': True,
             'query': self.request.GET.get('query'),
         })
 
@@ -57,7 +89,7 @@ class DetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         package = context['package']
         downloads = package.packagedownload_set.count()
-        versions = package.version_set
+        versions = package.version_set.all()
         default_version = None
         for version in versions:
             if version == package.default_version:
@@ -154,16 +186,15 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'packages/create_version.html'
     context_object_name = 'package'
 
-    def get_object(self):
-        unique_field = self.kwargs['unique_field']
-        if unique_field.isdigit():
-            return Package.objects.get(id=unique_field)
-
-        return Package.objects.get(name=unique_field)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        package_name = self.kwargs['name']
+        package = None
+        unique_field = self.kwargs['unique_field']
+        if unique_field.isdigit():
+            package = Package.objects.get(id=unique_field)
+        else:
+            package = Package.objects.get(name=unique_field)
+
         versions = list(Version.objects.filter(parent_package=package))
         versions.sort(
             # Sort them as lists of major-minor-patch versions, in (hopefully)
@@ -172,7 +203,7 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
             reverse=True,
         )
 
-        back_url = '/packages/{}/edit/'.format(package_name)
+        back_url = '/packages/{}/edit/'.format(unique_field)
 
         context.update({
             'package': package,

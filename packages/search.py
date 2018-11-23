@@ -6,7 +6,7 @@ from django.db.models import F, Func, Value
 from packages.models import Package
 
 
-def packages_search_filter(query, queryset, word_rule='|', quantity=10):
+def packages_search_filter(query, queryset, word_rule='&', quantity=10):
     # Split the query into whitespace-separated subqueries, each of which will
     # either be queried together or separately, depending on the options.
     nice_query = split(r'\s', query.strip())

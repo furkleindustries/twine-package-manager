@@ -1,4 +1,6 @@
-<header class="Header">
+{% load escape_quotation_marks %}
+
+<header class="header">
     <a href="/">Home</a>
 
     <a href="/packages">Packages</a>
@@ -13,14 +15,15 @@
         <a href="/login">Login</a>
     {% endif %}
 
-    <div class="searchBarContainer">
+    <div class="search_bar_container">
         <input
             type="text"
-            class="searchBar"
+            class="search_bar"
             tabindex="1"
+            value="{{ query|escape_quotation_marks|safe }}"
         >
 
-        <button class="searchButton">
+        <button class="search_button">
             Search
         </button>
     </div>

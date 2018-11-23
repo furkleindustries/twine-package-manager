@@ -27,7 +27,7 @@ function formSubmitToXHR(form) {
             responseObj = JSON.parse(this.responseText);
         } catch (e) {}
 
-        if (this.status === 200) {
+        if (this.status.toString()[0] === '2') {
             /* Redirect back to the account page. */
             if (form.dataset.redirectUrl) {
                 window.location = form.dataset.redirectUrl;
@@ -37,11 +37,21 @@ function formSubmitToXHR(form) {
         } else if (errorContainer) {
             var errKeys = Object.keys(responseObj);
             for (var ii = 0; ii < errKeys.length; ii += 1) {
-                var li = document.createElement('li');
                 var errs = responseObj[errKeys[ii]];
-                var text = errKeys[ii] + ':\n';
-                for (var jj = 0; jj < errs.length; jj += 1) {
-                    text += responseObj[errKeys[ii]][jj] + '\n';
+                var li = document.createElement('li');
+                var text = '';
+                if (errs && errs.length) {
+                    text = errKeys[ii] + ':\n';
+                    for (var jj = 0; jj < errs.length; jj += 1) {
+                        var err = responseObj[errKeys[ii]][jj];
+                        if (typeof err === 'string') {
+                            text += err + '\n';
+                        } else {
+                            text += JSON.stringify(err) + '\n';
+                        }
+                    }
+                } else {
+                    text += JSON.stringify(errs) + '\n';
                 }
 
                 li.textContent = text;

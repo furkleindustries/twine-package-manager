@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-{% load escape_quotation_marks %}
-
 {% block extraheaders %}
 <title>Twine Package Manager - Search {{ query }}</title>
 <meta
@@ -15,18 +13,11 @@
         {% if query %}
             <ul>
                 {% for package in packages %}
-                    {% with package_links=True as_list=True %}
-                        {% include "packages/package.html" %}
-                    {% endwith %}
+                    {% include 'packages/package.html' %}
                 {% empty %}
                     No packages match the query "{{ query }}".
                 {% endfor %}
             </ul>
-
-            <script>
-            /* Set the search bar value to the performed query. */
-            document.querySelector('.searchBar').value = '{{ query|escape_quotation_marks|safe }}';
-            </script>
         {% else %}
             <p>
                 You must provide a search query to get search results.
