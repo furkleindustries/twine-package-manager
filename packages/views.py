@@ -41,6 +41,7 @@ class KeywordView(generic.ListView):
         context = super().get_context_data(**kwargs)
         context.update({
             'as_list': True,
+            'keyword': self.kwargs['keyword'],
             'keyword_links': True,
         })
 
