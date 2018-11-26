@@ -68,7 +68,7 @@
                 {% for version in versions %}
                     <li class="version">
                         <strong
-                            class="versionIdentifier {% if package.default_version == version %} default{% endif %}"
+                            class="version_identifier {% if package.default_version == version %} default{% endif %}"
                             href="/versions/{{ version.id }}/"
                             data-version-identifier="{{ version.version_identifier }}"
                         >
