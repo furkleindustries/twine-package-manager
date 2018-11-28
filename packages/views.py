@@ -21,6 +21,7 @@ class IndexView(generic.ListView):
         context.update({
             'as_list': True,
             'keyword_links': True,
+            'package_links': True,
         })
 
         return context
@@ -41,7 +42,7 @@ class KeywordView(generic.ListView):
         context = super().get_context_data(**kwargs)
         context.update({
             'as_list': True,
-            'keyword': self.kwargs['keyword'],
+            'keyword': self.kwargs.get('keyword') or '',
             'keyword_links': True,
         })
 
@@ -69,7 +70,7 @@ class SearchView(generic.ListView):
         context.update({
             'as_list': True,
             'keyword_links': True,
-            'query': self.request.GET.get('query'),
+            'query': self.request.GET.get('query') or '',
         })
 
         return context
