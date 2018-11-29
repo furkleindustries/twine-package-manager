@@ -23,5 +23,13 @@
                 No packages exist yet.
             {% endfor %}
         </ul>
+
+        {% if previous_url %}
+            <a href="{{ previous_url }}">Previous</a>
+        {% endif %}
+
+        {% if next_url %}
+            <a href="{{ next_url }}">Next</a>
+        {% endif %}
     </article>
 {% endblock %}
