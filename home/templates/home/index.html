@@ -7,101 +7,135 @@
     name="description"
     content="Twine Package Manager is a package manager for the Twine system, designed to allow simple sharing and reuse of code by creators from all aspects of Twine."
 >
+
+<link
+    rel="stylesheet"
+    type="text/css"
+    href="/static/styles/home/home.css"
+>
 {% endblock %}
 
 {% block content %}
-<article class="container">
+<article class="home container">
     <h1 class="page-title">
         Twine Package Manager
     </h1>
 
-    <section class="introduction">
-        <h2 class="introduction-title">
-            Build and use new Twine macros, plugins, and formats
-        </h2>
+    <div class="home-top-row row">
+        <div class="col-sm">
+            <section class="introduction">
+                <h2 class="introduction-title">
+                    Build and use new Twine macros, plugins, and formats
+                </h2>
+        
+                <p>
+                    Twine Package Manager, or TwinePM, is a package manager for
+                    developers who make Twine modules, and for authors who want
+                    to make use of the pre-existing, proven labors of other
+                    community members in order to make their hypertext fiction
+                    and games even better.
+                </p>
+            </section> 
+        </div>
 
-        <p>
-            Twine Package Manager, or TwinePM, is a package manager for
-            developers who make Twine modules, and for authors who want
-            to make use of the pre-existing, proven labors of other
-            community members in order to make their hypertext fiction
-            and games even better.
-        </p>
-    </section> 
+        <div class="col-sm">
+            {% if logged_in %}
+                <section class="create-new-package">
+                    <h3 class="create-new-package-title">
+                        Create a new package
+                    </h3>
+        
+                    <p>
+                        Got a cool idea? Made something useful or pretty for one of your
+                        stories? <a href="/packages/create/">Add something new</a> to
+                        the TwinePM ecosystem.
+                    </p>
+                </section>
+            {% else %}
+                <section class="sign-up">
+                    <h3 class="sign-up-title">
+                        Make an account today
+                    </h3>
 
-    {% if logged_in %}
-        <section class="create-new-package">
-            <h3 class="create-new-package-title">
-                Create a new package
-            </h3>
+                    <p>
+                        Start finding and creating new CSS themes, macros,
+                        syntax highlighters, and more
+                    </p>
 
-            <p>
-                Got a cool idea? Made something useful or pretty for one of your
-                stories? <a href="/packages/create/">Add something new</a> to
-                the TwinePM ecosystem.
-            </p>
-        </section>
-    {% else %}
-        <section class="sign-up">
-            <h3 class="sign-up-title">
-                Sign up for free and start finding and creating new CSS
-                themes, macros, syntax highlighters, and more.
-            </h3>
+                    {% include "signup_link_widget.html" %}
+                </section>
+            {% endif %}
+        </div>
 
-            {% include "signup_link_widget.html" %}
-        </section>
-    {% endif %}
+        <div class="col-sm">
+            <section class="twine-message">
+                <h3 class="twine-message-title">
+                    Need Twine first?
+                </h3>
+        
+                <p>
+                    Head over to
+                    <a href="//twinery.org">Twinery</a>
+                    to use the online version or download the desktop version.
+                </p>
+            </section>
+        </div>
+    </div>
 
-    <section class="twine-message">
-        <h3 class="twine-message-title">
-            Need Twine first?
-        </h3>
+    <div class="row">
+        <div class="col-sm">
+            <section class="most-downloaded-packages">
+                <h3 class="most-downloaded-packages-title home-packages-title">
+                    Most downloaded packages
+                </h3>
 
-        <p>
-            Head over to
-            <a href="//twinery.org">Twinery</a>
-            to use the online version or download the desktop version.
-            
-            <button id="hideMessage">X</button>
-        </p>
-    </section>
+                <ul class="home-packages-list home-most-downloaded-packages-list">
+                    {% for package in most_downloaded_packages %}
+                        <li class="package-list-item">
+                            {% include "packages/package.html" %}
+                        </li>
+                    {% empty %}
+                        <span>No packages have been created yet.</span>
+                    {% endfor %}
+                </ul>
+            </section>
+        </div>
 
-    <section>
-        <h3 class="newest-packages-title">
-            Newest packages
-        </h3>
+        <div class="col-sm">
+            <section class="newest-packages">
+                <h3 class="newest-packages-title home-packages-title">
+                    Newest packages
+                </h3>
 
-        <ul class="package-list">
-            {% for package in newest_packages %}
-                <li class="package-list-item">
-                    {% include "packages/package.html" %}
-                </li>
-            {% endfor %}
-        </ul>
-    </section>
+                <ul class="home-packages-list home-newest-packages-list">
+                    {% for package in newest_packages %}
+                        <li class="package-list-item">
+                            {% include "packages/package.html" %}
+                        </li>
+                    {% empty %}
+                        <span>No packages have been created yet.</span>
+                    {% endfor %}
+                </ul>
+            </section>
+        </div>
+
+        <div class="col-sm">
+            <section class="recently-modified-packages">
+                <h3 class="recently-modified-packages-title home-packages-title">
+                    Recently modified packages
+                </h3>
+    
+                <ul class="home-packages-list home-recently-modified-packages-list">
+                    {% for package in recently_modified_packages %}
+                        <li class="package-list-item">
+                            {% include "packages/package.html" %}
+                        </li>
+                    {% empty %}
+                        <span>No packages have been created yet.</span>
+                    {% endfor %}
+                </ul>
+            </section>
+        </div>
+    </div>
 </article>
-
-<script id="hide-twine-message">
-(function iife() {
-    function hideTwineMessage() {
-        var twineMessage = document.querySelector('.twine-message');
-        if (twineMessage) {
-            twineMessage.hidden = true;
-            twineMessage.style.display = 'none';
-        }
-    }
-
-    var hideMessage = document.querySelector('#hideMessage');
-    if (hideMessage) {
-        hideMessage.addEventListener('click', function hide() {
-            localStorage.hideTwineMessage = 'true';
-            hideTwineMessage();
-        });
-    }
-
-    if (localStorage && localStorage['hideTwineMessage'] === 'true') {
-        hideTwineMessage();
-    }
-})();
-</script>
 {% endblock %}

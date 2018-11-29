@@ -13,3 +13,13 @@ html, body {
 .hidden {
     display: none;
 }
+
+.page-title {
+    margin: 0 auto 1.5rem auto;
+    text-align: center;
+    font-weight: 300;
+}
+
+.package-list-item {
+    list-style: none;
+}

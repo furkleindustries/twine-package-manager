@@ -1,5 +1,5 @@
 <article class="package">
-    <h1 class="package-title{% if multiple_packages %} h3{% endif %}">
+    <h1 class="package-title{% if package_small_size %} h4{% endif %}">
         {% if package_links %}
             {% if package.owner == request.user %}
                 <a href="/packages/{{ package.name }}/edit">{{ package.name }}</a>

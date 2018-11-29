@@ -14,14 +14,14 @@ class IndexView(generic.ListView):
     context_object_name = 'packages'
 
     def get_queryset(self):
-        return Package.objects.order_by('-date_created')
+        return Package.objects.order_by('-date_created')[:100]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'as_list': True,
             'keyword_links': True,
             'package_links': True,
+            'package_small_size': True,
         })
 
         return context
