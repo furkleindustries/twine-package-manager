@@ -33,11 +33,17 @@ class PackageList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           PackageIsOwnerOrReadOnly)
 
-    pagination_class = PageSizeAwareCursorPagination
+    pagination_class = PageSizeAwareOffsetPagination
 
     filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('id', 'name', 'date_created')
-    ordering = ('-date_created',)
+    ordering_fields = ('id', 'name', 'date_created', 'date_modified',
+                       'downloads',)
+    ordering = ('-downloads',)
+
+    def get_queryset(self):
+        return self.queryset.all().annotate(
+            downloads=Count('packagedownload')
+        )
 
 
 class PackageSearch(generics.ListAPIView):
@@ -62,31 +68,6 @@ class PackageKeywordList(generics.ListAPIView):
         ).annotate(
             downloads=Count('packagedownload')
         )
-
-
-class PackageTopDownloads(generics.ListAPIView):
-    queryset = Package.objects.all()
-    serializer_class = PackageSerializer
-    pagination_class = PageSizeAwareOffsetPagination
-
-    filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('downloads',)
-    ordering = ('-downloads',)
-
-    def get_queryset(self):
-        return self.queryset.all().annotate(
-            downloads=Count('packagedownload')
-        )
-
-
-class PackagesMostRecentlyModified(generics.ListAPIView):
-    queryset = Package.objects.all()
-    serializer_class = PackageSerializer
-    pagination_class = PageSizeAwareOffsetPagination
-
-    filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('date_modified',)
-    ordering = ('-date_modified',)
 
 
 class PackageDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -29,6 +29,13 @@ class IndexView(generic.TemplateView):
         url = self.request.build_absolute_uri('/api/packages/')
 
         fetched = requests.get(url, fetch_params)
+        if str(fetched.status_code)[0] != '2':
+            context.update({
+                'error': 'There was an error querying the database.',
+            })
+
+            return context
+
         obj = fetched.json()
         packages = obj['results']
         previous_url = (obj['previous'] or '').replace('/api', '')
