@@ -8,12 +8,18 @@
     overflow: hidden;
 }
 
-.home-top-row {
+.home-introduction-row {
     margin-bottom: 1rem;
 }
 
-@media screen and (min-width: 768px) {
-    .home-packages-title {
+@media screen and (min-width: 576px) {
+    .home-packages-row .home-hero-title {
         height: 7rem;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .home-packages-row .home-hero-title {
+        height: 5rem;
     }
 }
