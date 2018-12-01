@@ -12,21 +12,30 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 
+from json import loads
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-secrets_dir = os.path.join(BASE_DIR, 'secrets')
+SECRETS_DIR = os.path.join(BASE_DIR, 'secrets')
 
-if not os.path.isdir(secrets_dir):
-    os.mkdir(secrets_dir, 0o700)
+if not os.path.isdir(SECRETS_DIR):
+    os.mkdir(SECRETS_DIR, 0o700)
 
 SECRET_KEY = None
-with open(os.path.join(secrets_dir, 'django_secret_key')) as f:
+with open(os.path.join(SECRETS_DIR, 'django_secret_key')) as f:
     SECRET_KEY = f.read().strip()
 
+POSTGRES_DATABASE_NAME = None
 POSTGRES_DATABASE_PASSWORD = None
-with open(os.path.join(secrets_dir, 'postgres_db_password')) as f:
-    POSTGRES_DATABASE_PASSWORD = f.read().strip()
+POSTGRES_DATABASE_USERNAME = None
+with open(os.path.join(SECRETS_DIR, 'postgres_db_credentials.json')) as f:
+    data = loads(f.read())
+    POSTGRES_DATABASE_NAME = data['databaseName']
+    POSTGRES_DATABASE_PASSWORD = data['password']
+    POSTGRES_DATABASE_USERNAME = data['user']
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
@@ -101,8 +110,8 @@ WSGI_APPLICATION = 'twine_package_manager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'twine_package_manager',
-        'USER': 'twine_package_manager',
+        'NAME': POSTGRES_DATABASE_NAME,
+        'USER': POSTGRES_DATABASE_USER,
         'PASSWORD': POSTGRES_DATABASE_PASSWORD,
         'HOST': 'localhost',
         'PORT': '5432',
