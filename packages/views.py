@@ -1,3 +1,8 @@
+import requests
+
+from os import path
+from urllib.parse import urlparse
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
@@ -9,18 +14,40 @@ from versions.models import Version
 from .models import Package
 
 
-class IndexView(generic.ListView):
+class IndexView(generic.TemplateView):
     template_name = 'packages/index.html'
     context_object_name = 'packages'
 
-    def get_queryset(self):
-        return Package.objects.order_by('-date_created')
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        fetch_params = {
+            'page_size': self.request.GET.get('page_size') or 1,
+            'cursor': self.request.GET.get('cursor') or '',
+        }
+
+        url = self.request.build_absolute_uri('/api/packages/')
+
+        fetched = requests.get(url, fetch_params)
+        if str(fetched.status_code)[0] != '2':
+            context.update({
+                'error': 'There was an error querying the database.',
+            })
+
+            return context
+
+        obj = fetched.json()
+        packages = obj['results']
+        previous_url = (obj['previous'] or '').replace('/api', '')
+        next_url = (obj['next'] or '').replace('/api', '')
+
         context.update({
-            'as_list': True,
             'keyword_links': True,
+            'packages': packages,
+            'package_links': True,
+            'package_small_size': True,
+            'previous_url': previous_url,
+            'next_url': next_url,
         })
 
         return context
@@ -41,7 +68,7 @@ class KeywordView(generic.ListView):
         context = super().get_context_data(**kwargs)
         context.update({
             'as_list': True,
-            'keyword': self.kwargs['keyword'],
+            'keyword': self.kwargs.get('keyword') or '',
             'keyword_links': True,
         })
 
@@ -69,7 +96,7 @@ class SearchView(generic.ListView):
         context.update({
             'as_list': True,
             'keyword_links': True,
-            'query': self.request.GET.get('query'),
+            'query': self.request.GET.get('query') or '',
         })
 
         return context

@@ -9,8 +9,48 @@
 {% endblock %}
 
 {% block content %}
-    <article>
+    <article class="container">
         <h1>Packages</h1>
+
+        <label for="packages-ordering-field">
+            Order by:
+        </label>
+
+        <select id="packages-ordering-field" class="packages-ordering-field">
+            <option value="downloads"{% if not ordering_field or ordering_field == 'downloads' %} selected{% endif %}>
+                Downloads
+            </option>
+
+            <option value="id"{% if ordering_field == 'id' %} selected{% endif %}>
+                ID
+            </option>
+
+            <option value="date_modified"{% if ordering_field == 'date_modified' %} selected{% endif %}>
+                Date last modified
+            </option>
+
+            <option value="date_created"{% if ordering_field == 'date_created' %} selected{% endif %}>
+                Date created
+            </option>
+        </select>
+
+        <label for="packages-ordering-direction">
+            Order direction:
+        </label>
+
+        <select id="packages-ordering-direction">
+            <option value="ascending"{% if ordering_direction == 'ascending' %} selected{% endif %}>
+                Ascending
+            </option>
+
+            <option value="descending"{% if not ordering_direction or ordering_direction == 'descending' %} selected{% endif %}>
+                Descending
+            </option>
+        </select>
+
+        <button class="update">
+            Update
+        </button>
 
         <div>
             <a href="/packages/create/">Create new package</a>
@@ -23,5 +63,13 @@
                 No packages exist yet.
             {% endfor %}
         </ul>
+
+        {% if previous_url %}
+            <a href="{{ previous_url }}">Previous</a>
+        {% endif %}
+
+        {% if next_url %}
+            <a href="{{ next_url }}">Next</a>
+        {% endif %}
     </article>
 {% endblock %}

@@ -9,24 +9,27 @@
 {% endblock %}
 
 {% block content %}
-    <h2>Sign up</h2>
-    <form method="post">
-        {% csrf_token %}
+    <article class="container">
+        <h2>Sign up</h2>
 
-        {{ form.as_p }}
+        <form method="POST">
+            {% csrf_token %}
+    
+            {{ form.as_p }}
+    
+            <div>
+                <label for="email">
+                    E-mail
+                </label>
 
-        <div>
-            <label for="email">
-                E-mail
-            </label>
-
-            <input
-                id="email"
-                name="email"
-                type="email"
-            >
-        </div>
-
-        <button type="submit">Sign up</button>
-    </form>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                >
+            </div>
+    
+            <button type="submit">Sign up</button>
+        </form>
+    </article>
 {% endblock %}

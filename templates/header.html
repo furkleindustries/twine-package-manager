@@ -1,29 +1,29 @@
 {% load escape_quotation_marks %}
 
-<header class="header">
-    <a href="/">Home</a>
+<header class="header container">
+    <a class="header-link" href="/">Home</a>
 
-    <a href="/packages">Packages</a>
+    <a class="header-link" href="/packages">Packages</a>
 
     {% if logged_in %}
-        <a href="/account">Account</a>
+        <a class="header-link" href="/account">Account</a>
 
-        <a href="/logout">Logout</a>
+        <a class="header-link" href="/logout">Logout</a>
     {% else %}
-        <a href="/register">Register</a>
+        <a class="header-link" href="/register">Register</a>
 
-        <a href="/login">Login</a>
+        <a class="header-link" href="/login">Login</a>
     {% endif %}
 
-    <div class="search_bar_container">
+    <div class="search-bar-container">
         <input
             type="text"
-            class="search_bar"
+            class="search-bar"
             tabindex="1"
             value="{{ query|escape_quotation_marks|safe }}"
         >
 
-        <button class="search_button">
+        <button class="search-button">
             Search
         </button>
     </div>

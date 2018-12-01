@@ -10,40 +10,42 @@
 {% endblock %}
 
 {% block content %}
-<form method="POST">
-    {% csrf_token %}
+<article class="container">
+    <form method="POST">
+        {% csrf_token %}
+    
+        {{ form.as_p }}
+    
+        <button type="submit">Submit</button>
+    </form>
 
-    {{ form.as_p }}
-
-    <button type="submit">Submit</button>
-</form>
-
-{% if form.errors %}
-    <!-- Hide the error box above the form inputs and add a new one below,
-         so that the inputs do not move after the errors are hidden. -->
-    <ul class="error">
-        {% for field in form %}
-            {% for error in fields %}
+    {% if form.errors %}
+        <!-- Hide the error box above the form inputs and add a new one below,
+             so that the inputs do not move after the errors are hidden. -->
+        <ul class="error">
+            {% for field in form %}
+                {% for error in fields %}
+                    <li>
+                        {{ error|escape }}
+                    </li>
+                {% endfor %}
+            {% endfor %}
+            
+            {% for error in form.non_field_errors %}
                 <li>
                     {{ error|escape }}
                 </li>
             {% endfor %}
-        {% endfor %}
-        
-        {% for error in form.non_field_errors %}
-            <li>
-                {{ error|escape }}
-            </li>
-        {% endfor %}
-    </ul>
-
+        </ul>
     
-    <style id="hideTopErrors">
-        .errorlist {
-            display: none;
-        }
-    </style>
-{% endif %}
+        
+        <style id="hideTopErrors">
+            .errorlist {
+                display: none;
+            }
+        </style>
+    {% endif %}
+</article>
 
 {% include "hide_errors.html" %}
 {% endblock %}
