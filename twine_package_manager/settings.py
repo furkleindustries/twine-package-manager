@@ -15,12 +15,17 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+secrets_dir = os.path.join(BASE_DIR, 'secrets')
+
+if not os.path.isdir(secrets_dir):
+    os.mkdir(secrets_dir, 0o700)
+
 SECRET_KEY = None
-with open(os.path.join(BASE_DIR, 'secrets', 'django_secret_key')) as f:
+with open(os.path.join(secrets_dir, 'django_secret_key')) as f:
     SECRET_KEY = f.read().strip()
 
 POSTGRES_DATABASE_PASSWORD = None
-with open(os.path.join(BASE_DIR, 'secrets', 'postgres_db_password')) as f:
+with open(os.path.join(secrets_dir, 'postgres_db_password')) as f:
     POSTGRES_DATABASE_PASSWORD = f.read().strip()
 
 # Quick-start development settings - unsuitable for production

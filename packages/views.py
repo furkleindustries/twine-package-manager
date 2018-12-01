@@ -1,56 +1,20 @@
-import requests
-
 from os import path
 from urllib.parse import urlparse
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
-from .forms import PackageCreateForm, PackageUpdateForm
+from api.views import PackageList
 from packages.models import Package, PackageDownload
 from packages.search import packages_search_filter
 from versions.models import Version
 
+from .forms import PackageCreateForm, PackageUpdateForm
 from .models import Package
 
 
-class IndexView(generic.TemplateView):
+class IndexView(PackageList):
     template_name = 'packages/index.html'
-    context_object_name = 'packages'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        fetch_params = {
-            'page_size': self.request.GET.get('page_size') or 1,
-            'cursor': self.request.GET.get('cursor') or '',
-        }
-
-        url = self.request.build_absolute_uri('/api/packages/')
-
-        fetched = requests.get(url, fetch_params)
-        if str(fetched.status_code)[0] != '2':
-            context.update({
-                'error': 'There was an error querying the database.',
-            })
-
-            return context
-
-        obj = fetched.json()
-        packages = obj['results']
-        previous_url = (obj['previous'] or '').replace('/api', '')
-        next_url = (obj['next'] or '').replace('/api', '')
-
-        context.update({
-            'keyword_links': True,
-            'packages': packages,
-            'package_links': True,
-            'package_small_size': True,
-            'previous_url': previous_url,
-            'next_url': next_url,
-        })
-
-        return context
 
 
 class KeywordView(generic.ListView):
