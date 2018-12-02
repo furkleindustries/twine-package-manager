@@ -27,11 +27,9 @@ from .permissions import (
 )
 
 
-class PackageList(generics.ListCreateAPIView):
+class PackageListMixin():
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          PackageIsOwnerOrReadOnly)
 
     pagination_class = PageSizeAwareOffsetPagination
 
@@ -44,6 +42,15 @@ class PackageList(generics.ListCreateAPIView):
         return self.queryset.all().annotate(
             downloads=Count('packagedownload')
         )
+
+
+class PackageListGetOnly(PackageListMixin, generics.ListAPIView):
+    pass
+
+
+class PackageList(PackageListMixin, generics.ListCreateAPIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          PackageIsOwnerOrReadOnly)
 
 
 class PackageSearch(generics.ListAPIView):
