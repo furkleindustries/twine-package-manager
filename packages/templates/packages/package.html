@@ -121,7 +121,7 @@
                     <li>
                         <a href="/versions{{ default_version.id }}/">
                             <strong>
-                                {{ default_version.version_identifier }}
+                                {{ default_version.semver_identifier }}
                             </strong>
                         </a>
                     </li>
@@ -131,7 +131,7 @@
                     {% if version != default_version %}
                         <li>
                             <a href="/versions/{{ version.id }}/">
-                                {{ version.version_identifier }}
+                                {{ version.semver_identifier }}
                             </a>
                         </li>
                     {% endif %}

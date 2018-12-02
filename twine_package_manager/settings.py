@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 
-from json import loads
+from json import load
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -29,12 +29,12 @@ with open(os.path.join(SECRETS_DIR, 'django_secret_key')) as f:
 
 POSTGRES_DATABASE_NAME = None
 POSTGRES_DATABASE_PASSWORD = None
-POSTGRES_DATABASE_USERNAME = None
+POSTGRES_DATABASE_USER = None
 with open(os.path.join(SECRETS_DIR, 'postgres_db_credentials.json')) as f:
-    data = loads(f.read())
+    data = load(f) 
     POSTGRES_DATABASE_NAME = data['databaseName']
     POSTGRES_DATABASE_PASSWORD = data['password']
-    POSTGRES_DATABASE_USERNAME = data['user']
+    POSTGRES_DATABASE_USER = data['user']
 
 
 # Quick-start development settings - unsuitable for production

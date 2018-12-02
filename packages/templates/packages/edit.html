@@ -41,12 +41,12 @@
                     >
                         {% for version in versions %}
                             <option {% if package.default_version == version %}selected{% endif %}>
-                                {{ version.version_identifier }}
+                                {{ version.semver_identifier }}
                             </option>
                         {% endfor %}
                     </select>
                 {% else %}
-                    <span>{{ package.default_version.version_identifier }}</span>
+                    <span>{{ package.default_version.semver_identifier }}</span>
                 {% endif %}
             </div>
         {% endif %}
@@ -68,11 +68,11 @@
                 {% for version in versions %}
                     <li class="version">
                         <strong
-                            class="version_identifier {% if package.default_version == version %} default{% endif %}"
+                            class="semver_identifier {% if version.is_default %} default{% endif %}"
                             href="/versions/{{ version.id }}/"
-                            data-version-identifier="{{ version.version_identifier }}"
+                            data-semver-identifier="{{ version.semver_identifier }}"
                         >
-                            {{ version.version_identifier }}
+                            {{ version.semver_identifier }}
                         </strong>
 
                         <a href="/versions/{{ version.id }}/delete/"

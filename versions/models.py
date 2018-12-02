@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Version(models.Model):
-    version_identifier = models.CharField(max_length=128)
+    semver_identifier = models.CharField(max_length=128)
 
     author = models.ForeignKey(
         User,

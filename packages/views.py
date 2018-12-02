@@ -84,8 +84,9 @@ class DetailView(generic.DetailView):
         versions = package.version_set.all()
         default_version = None
         for version in versions:
-            if version == package.default_version:
+            if version.is_default:
                 default_version = version
+                break
 
         context.update({
             'package': package,
@@ -191,7 +192,7 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
         versions.sort(
             # Sort them as lists of major-minor-patch versions, in (hopefully)
             # valid semver order.
-            key=lambda x: x.version_identifier.split('.'),
+            key=lambda x: x.semver_identifier.split('.'),
             reverse=True,
         )
 

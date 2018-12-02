@@ -33,15 +33,15 @@
         </p>
 
         <div>
-            <label for="version_identifier">
+            <label for="semver_identifier">
                 <em>
                     Version identifier (must be package-unique)
                 </em>
             </label>
 
             <input
-                id="version_identifier"
-                name="version_identifier"
+                id="semver_identifier"
+                name="semver_identifier"
                 required
             >
         </div>
@@ -60,7 +60,7 @@
                     <ul class="hideable hidden">
                         {% for version in existing_versions %}
                             <li>
-                                {{ version.version_identifier }}
+                                {{ version.semver_identifier }}
                             </li>
                         {% empty %}
                             <p>

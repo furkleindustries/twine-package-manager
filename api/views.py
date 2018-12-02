@@ -89,7 +89,7 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
         default_version = None
         if serializer.validated_data.get('default_version'):
             default_version = package.version_set.get(
-                version_identifier=serializer.validated_data['default_version']
+                semver_identifier=serializer.validated_data['default_version']
             )
 
         keywords = split_keywords(serializer.validated_data['keywords'][0])
@@ -99,7 +99,7 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
         if default_version:
             actual_version = Version.objects.get(
                 parent_package=package,
-                version_identifier=default_version,
+                semver_identifier=default_version,
             )
 
             serializer.validated_data['default_version'] = actual_version
@@ -212,7 +212,7 @@ class VersionDetail(generics.RetrieveDestroyAPIView):
                                 'identifier.')
 
             version = self.queryset.get(
-                version_identifier=field, parent_package__id=package_id
+                semver_identifier=field, parent_package__id=package_id
             )
 
         return version
