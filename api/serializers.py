@@ -15,8 +15,6 @@ class PackageSerializer(serializers.ModelSerializer):
                   'default_version', 'keywords', 'tag', 'date_created',
                   'date_modified', 'versions', 'downloads')
 
-    name = serializers.ReadOnlyField()
-
     date_created = serializers.ReadOnlyField()
 
     default_version = serializers.SerializerMethodField()

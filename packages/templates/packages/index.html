@@ -56,7 +56,7 @@
     </button>
 
     <ul>
-        {% for package in packages %}
+        {% for package in results %}
             {% include 'packages/package.html' %}
         {% empty %}
             No packages exist yet.

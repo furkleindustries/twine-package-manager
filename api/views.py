@@ -17,6 +17,8 @@ from packages.models import (
 from profiles.models import Profile
 from versions.models import Version
 
+from .mixins import IntegrityErrorAwareMixin
+
 from .pagination import (
     PageSizeAwareCursorPagination, PageSizeAwareOffsetPagination,
 )
@@ -48,7 +50,11 @@ class PackageListGetOnly(PackageListMixin, generics.ListAPIView):
     pass
 
 
-class PackageList(PackageListMixin, generics.ListCreateAPIView):
+class PackageList(
+    PackageListMixin,
+    IntegrityErrorAwareMixin,
+    generics.ListCreateAPIView,
+):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           PackageIsOwnerOrReadOnly)
 
@@ -154,6 +160,21 @@ class PackageCreateVersion(generics.CreateAPIView):
     def perform_create(self, serializer):
         package = self.get_object()
         serializer.validated_data['parent_package'] = package
+
+        existing_version = None
+        try:
+            sv_key = 'semver_identifier'
+            existing_version = Version.objects.get(
+                semver_identifier=serializer.validated_data[sv_key],
+                parent_package=package
+            )
+        except Version.DoesNotExist:
+            pass
+
+        if existing_version:
+            raise Exception('There is already a version for this package ' +
+                            'with the same semver identifier.')
+
         super(PackageCreateVersion, self).perform_create(serializer)
 
 

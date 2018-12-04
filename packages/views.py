@@ -5,7 +5,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from api.renderers import ContextAwareTemplateHTMLRenderer
-from api.views import PackageListGetOnly
+from api.views import (
+    PackageListGetOnly,
+    PackageKeywordList,
+)
+
 from packages.models import Package, PackageDownload
 from packages.search import packages_search_filter
 from versions.models import Version
@@ -35,24 +39,20 @@ class IndexView(PackageListGetOnly):
             'keyword_links': True,
             'ordering_direction': ordering_direction,
             'ordering_field': ordering_field,
+            'package_links': True,
+            'show_author': True,
         })
 
         return context
 
 
-class KeywordView(generic.ListView):
+class KeywordView(PackageKeywordList):
+    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
     template_name = 'packages/keywords.html'
     context_object_name = 'packages'
 
-    def get_queryset(self):
-        packages = Package.objects.all()
-        keyword = self.kwargs['keyword']
-        return packages.filter(keywords__icontains=keyword).order_by(
-            'packagedownload'
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
         context.update({
             'as_list': True,
             'keyword': self.kwargs.get('keyword') or '',
@@ -106,10 +106,13 @@ class DetailView(generic.DetailView):
         downloads = package.packagedownload_set.count()
         versions = package.version_set.all()
         default_version = None
-        for version in versions:
-            if version.is_default:
-                default_version = version
-                break
+        try:
+            default_version = versions.get(
+                parent_package=package,
+                is_default=True,
+            )
+        except Version.DoesNotExist:
+            pass
 
         context.update({
             'package': package,
@@ -164,9 +167,7 @@ class CreateView(LoginRequiredMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'form_destination': '/api/packages/',
-            'form_method': 'POST',
-            'form_selector': '#packageCreate',
+            'form': PackageCreateForm,
         })
 
         return context

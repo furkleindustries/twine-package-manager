@@ -9,75 +9,29 @@
 {% endblock %}
 
 {% block content %}
+<script src="/static/scripts/formSubmitToXHR.js" async defer></script>
+
 <article class="container">
     <h1>
         Create a new package
     </h1>
 
-    <form id="packageCreate">
+    <form
+        class="package_create"
+        method="POST"
+        action="/api/packages/"
+        onsubmit="return formSubmitToXHR(document.querySelector('.package_create'))"
+    >
         {% csrf_token %}
 
-        <div>
-            <label for="name">
-                <em>
-                    Name
-                </em>
-            </label>
+        {{ form.as_p }}
 
-            <input
-                id="name"
-                name="name"
-                required
-            >
-        </div>
+        <input
+            type="submit"
+            value="Create package"
+        >
 
-        <div>
-            <label for="description">
-                <em>
-                    Description
-                </em>
-            </label>
-
-            <input
-                id="description"
-                name="description"
-                required
-            >
-        </div>
-
-        <div>
-            <label for="homepage">
-                <em>
-                    Homepage
-                </em>
-            </label>
-
-            <input
-                id="homepage"
-                name="homepage"
-            >
-        </div>
-
-        <div>
-            <label for="keywords">
-                <em>
-                    Keywords
-                </em>
-            </label>
-
-            <input
-                id="keywords"
-                name="keywords"
-            >
-        </div>
-
-        <button id="submit" type="button">
-            Create package
-        </button>
-
-        <ul class="error"></ul>
+        <ul class="error_container"></ul>
     </form>
 </article>
-
-{% include 'form_script.html' %}
 {% endblock %}
