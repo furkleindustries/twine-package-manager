@@ -9,17 +9,20 @@
 }
 
 .search-bar-container {
+    height: 2rem;
     font-size: 120%;
 }
 
 .search-bar {
     width: 75%;
+    height: 100%;
     margin-right: 3%;
 }
 
 .search-button {
     float: right;
     width: 22%;
+    height: 100%;
 }
 
 @media screen and (min-width: 576px) {

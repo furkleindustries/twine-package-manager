@@ -2,7 +2,7 @@
     var select = document.querySelector('#default_version');
     if (select) {
         var versionIdentifiers = Array.prototype.slice.call(
-            document.querySelectorAll('.version_identifier[data-version-identifier]'));
+            document.querySelectorAll('.semver_identifier[data-semver-identifier]'));
         if (versionIdentifiers) {
             select.onchange = function select(e) {
                 versionIdentifiers.forEach(function each(versionIdentifier) {

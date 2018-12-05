@@ -4,7 +4,12 @@ from urllib.parse import urlparse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
-from api.views import PackageList
+from api.renderers import ContextAwareTemplateHTMLRenderer
+from api.views import (
+    PackageListGetOnly,
+    PackageKeywordList,
+)
+
 from packages.models import Package, PackageDownload
 from packages.search import packages_search_filter
 from versions.models import Version
@@ -13,23 +18,41 @@ from .forms import PackageCreateForm, PackageUpdateForm
 from .models import Package
 
 
-class IndexView(PackageList):
+class IndexView(PackageListGetOnly):
+    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
     template_name = 'packages/index.html'
 
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
 
-class KeywordView(generic.ListView):
+        ordering_field = self.request.GET.get('ordering')
+
+        ordering_direction = 'ascending'
+        if not ordering_field:
+            ordering_direction = 'descending'
+        elif ordering_field[0] == '-':
+            ordering_field = ordering_field[1:]
+            ordering_direction = 'descending'
+
+        context.update({
+            'as_list': True,
+            'keyword_links': True,
+            'ordering_direction': ordering_direction,
+            'ordering_field': ordering_field,
+            'package_links': True,
+            'show_author': True,
+        })
+
+        return context
+
+
+class KeywordView(PackageKeywordList):
+    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
     template_name = 'packages/keywords.html'
     context_object_name = 'packages'
 
-    def get_queryset(self):
-        packages = Package.objects.all()
-        keyword = self.kwargs['keyword']
-        return packages.filter(keywords__icontains=keyword).order_by(
-            'packagedownload'
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
         context.update({
             'as_list': True,
             'keyword': self.kwargs.get('keyword') or '',
@@ -83,9 +106,13 @@ class DetailView(generic.DetailView):
         downloads = package.packagedownload_set.count()
         versions = package.version_set.all()
         default_version = None
-        for version in versions:
-            if version == package.default_version:
-                default_version = version
+        try:
+            default_version = versions.get(
+                parent_package=package,
+                is_default=True,
+            )
+        except Version.DoesNotExist:
+            pass
 
         context.update({
             'package': package,
@@ -140,9 +167,7 @@ class CreateView(LoginRequiredMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'form_destination': '/api/packages/',
-            'form_method': 'POST',
-            'form_selector': '#packageCreate',
+            'form': PackageCreateForm,
         })
 
         return context
@@ -191,7 +216,7 @@ class CreateVersionView(LoginRequiredMixin, generic.TemplateView):
         versions.sort(
             # Sort them as lists of major-minor-patch versions, in (hopefully)
             # valid semver order.
-            key=lambda x: x.version_identifier.split('.'),
+            key=lambda x: x.semver_identifier.split('.'),
             reverse=True,
         )
 

@@ -9,7 +9,7 @@
 			80,
 			120
 		],
-		"python.pythonPath": "~/.local/share/virtualenvs/twine-package-manager-kv6YfhEF/bin/python",
+		"python.pythonPath": "C:\\Users\\furkle\\.virtualenvs\\twine-package-manager-uNXbcwqE\\Scripts\\python.exe",
 		"python.linting.pep8Enabled": true,
 		"python.linting.pylintArgs": [
 			"--load-plugins=pylint_django"

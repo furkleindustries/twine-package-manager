@@ -15,17 +15,15 @@ class PackageSerializer(serializers.ModelSerializer):
                   'default_version', 'keywords', 'tag', 'date_created',
                   'date_modified', 'versions', 'downloads')
 
-    name = serializers.ReadOnlyField()
-
     date_created = serializers.ReadOnlyField()
 
     default_version = serializers.SerializerMethodField()
 
     def get_default_version(self, package):
-        if package.default_version:
-            return package.default_version.version_identifier
-
-        return None
+        try:
+            return Version.objects.get(parent_package=package, is_default=True)
+        except Version.DoesNotExist:
+            return None
 
     versions = serializers.SerializerMethodField(read_only=True)
 
@@ -37,7 +35,7 @@ class PackageSerializer(serializers.ModelSerializer):
             return [
                 VersionSerializer(x).data for x in Version.objects.filter(
                     parent_package=package
-                ) if x.version_identifier in include_versions or (
+                ) if x.semver_identifier in include_versions or (
                     'default' in include_versions and (
                         package.default_version == x
                     )
@@ -45,9 +43,9 @@ class PackageSerializer(serializers.ModelSerializer):
             ]
 
         else:
-            return [x['version_identifier'] for x in Version.objects.filter(
+            return [x['semver_identifier'] for x in Version.objects.filter(
                 parent_package=package,
-            ).values('version_identifier')]
+            ).values('semver_identifier')]
 
     downloads = serializers.SerializerMethodField(read_only=True)
 
@@ -112,5 +110,5 @@ class ProfileSerializer(serializers.ModelSerializer):
 class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
-        fields = ('id', 'version_identifier', 'author', 'description', 'js',
+        fields = ('id', 'semver_identifier', 'author', 'description', 'js',
                   'css', 'parent_package', 'date_created')

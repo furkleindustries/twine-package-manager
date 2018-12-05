@@ -17,6 +17,8 @@ from packages.models import (
 from profiles.models import Profile
 from versions.models import Version
 
+from .mixins import IntegrityErrorAwareMixin
+
 from .pagination import (
     PageSizeAwareCursorPagination, PageSizeAwareOffsetPagination,
 )
@@ -27,11 +29,9 @@ from .permissions import (
 )
 
 
-class PackageList(generics.ListCreateAPIView):
+class PackageListMixin():
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          PackageIsOwnerOrReadOnly)
 
     pagination_class = PageSizeAwareOffsetPagination
 
@@ -44,6 +44,19 @@ class PackageList(generics.ListCreateAPIView):
         return self.queryset.all().annotate(
             downloads=Count('packagedownload')
         )
+
+
+class PackageListGetOnly(PackageListMixin, generics.ListAPIView):
+    pass
+
+
+class PackageList(
+    PackageListMixin,
+    IntegrityErrorAwareMixin,
+    generics.ListCreateAPIView,
+):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          PackageIsOwnerOrReadOnly)
 
 
 class PackageSearch(generics.ListAPIView):
@@ -89,7 +102,7 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
         default_version = None
         if serializer.validated_data.get('default_version'):
             default_version = package.version_set.get(
-                version_identifier=serializer.validated_data['default_version']
+                semver_identifier=serializer.validated_data['default_version']
             )
 
         keywords = split_keywords(serializer.validated_data['keywords'][0])
@@ -99,7 +112,7 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
         if default_version:
             actual_version = Version.objects.get(
                 parent_package=package,
-                version_identifier=default_version,
+                semver_identifier=default_version,
             )
 
             serializer.validated_data['default_version'] = actual_version
@@ -147,6 +160,21 @@ class PackageCreateVersion(generics.CreateAPIView):
     def perform_create(self, serializer):
         package = self.get_object()
         serializer.validated_data['parent_package'] = package
+
+        existing_version = None
+        try:
+            sv_key = 'semver_identifier'
+            existing_version = Version.objects.get(
+                semver_identifier=serializer.validated_data[sv_key],
+                parent_package=package
+            )
+        except Version.DoesNotExist:
+            pass
+
+        if existing_version:
+            raise Exception('There is already a version for this package ' +
+                            'with the same semver identifier.')
+
         super(PackageCreateVersion, self).perform_create(serializer)
 
 
@@ -212,7 +240,7 @@ class VersionDetail(generics.RetrieveDestroyAPIView):
                                 'identifier.')
 
             version = self.queryset.get(
-                version_identifier=field, parent_package__id=package_id
+                semver_identifier=field, parent_package__id=package_id
             )
 
         return version

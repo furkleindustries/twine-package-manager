@@ -1,7 +1,7 @@
-.version_identifier {
+.semver_identifier {
 
 }
 
-.version_identifier.default {
+.semver_identifier.default {
     font-style: italic;
 }
