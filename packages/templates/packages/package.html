@@ -1,5 +1,9 @@
 <article class="package">
-    <h1 class="package-title{% if package_small_size %} h4{% endif %}">
+    {% if as_list %}
+    <h4 class="package-title">
+    {% else %}
+    <h1 class="package-title">
+    {% endif %}
         {% if package_links %}
             {% if package.owner == request.user %}
                 <a href="/packages/{{ package.name }}/edit">{{ package.name }}</a>
@@ -9,7 +13,11 @@
         {% else %}
             {{ package.name }}
         {% endif %}
+    {% if as_list %}
+    </h4>
+    {% else %}
     </h1>
+    {% endif %}
 
     {% if request.user == package.owner %}
     <a href="/packages/{{ package.name }}/edit/">Edit this package</a>

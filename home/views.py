@@ -14,7 +14,6 @@ def trim_name(name):
 
 class IndexView(generic.TemplateView):
     template_name = 'home/index.html'
-    context_object_name = 'latest_packages'
 
     def get_queryset(self):
         return Package.objects.all()
@@ -45,8 +44,8 @@ class IndexView(generic.TemplateView):
         r_mods_names = [{'name': trim_name(x['name'])} for x in r_mods]
 
         context.update({
+            'as_list': True,
             'package_links': True,
-            'package_small_size': True,
             'most_downloaded_packages': downloaded_names,
             'newest_packages': newest_names,
             'recently_modified_packages': r_mods_names,
