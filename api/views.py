@@ -83,11 +83,9 @@ class PackageKeywordList(generics.ListAPIView):
         )
 
 
-class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
+class PackageDetailMixin():
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          PackageIsOwnerOrReadOnly)
 
     def get_object(self):
         field = self.kwargs['field']
@@ -95,6 +93,44 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
             return Package.objects.get(id=field)
         else:
             return Package.objects.get(name=field)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        if request.method == 'GET' and request.GET.get('include_versions'):
+            # Register downloads of each fetched version.
+            for version in response.data['versions']:
+                if version['parent_package']:
+                    parent_package = None
+                    try:
+                        parent_package = Package.objects.get(
+                            id=version['parent_package']
+                        )
+                    except Package.DoesNotExist:
+                        pass
+
+                    if parent_package:
+                        dl = PackageDownload.objects.create(
+                            package=parent_package
+                        )
+
+                        dl.full_clean()
+                        dl.save()
+
+        return super().finalize_response(request, response, *args, **kwargs)
+
+
+class PackageDetailGetOnly(
+    PackageDetailMixin,
+    generics.RetrieveAPIView,
+):
+    pass
+
+
+class PackageDetail(
+    PackageDetailMixin,
+    generics.RetrieveUpdateDestroyAPIView,
+):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          PackageIsOwnerOrReadOnly)
 
     def perform_update(self, serializer):
         package = self.get_object()
@@ -118,30 +154,6 @@ class PackageDetail(generics.RetrieveUpdateDestroyAPIView):
             serializer.validated_data['default_version'] = actual_version
 
         super(PackageDetail, self).perform_update(serializer)
-
-    def finalize_response(self, request, response, *args, **kwargs):
-        if request.method == 'GET' and request.GET.get('include_versions'):
-            print(vars(response.data))
-            # Register downloads of each fetched version.
-            for version in response.data['versions']:
-                if version['parent_package']:
-                    parent_package = None
-                    try:
-                        parent_package = Package.objects.get(
-                            id=version['parent_package']
-                        )
-                    except Package.DoesNotExist:
-                        pass
-
-                    if parent_package:
-                        dl = PackageDownload.objects.create(
-                            package=parent_package
-                        )
-
-                        dl.full_clean()
-                        dl.save()
-
-        return super().finalize_response(request, response, *args, **kwargs)
 
 
 class PackageCreateVersion(generics.CreateAPIView):

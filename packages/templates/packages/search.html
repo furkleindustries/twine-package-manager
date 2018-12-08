@@ -9,19 +9,19 @@
 {% endblock %}
 
 {% block content %}
-    <article class="container">
-        {% if query %}
-            <ul>
-                {% for package in packages %}
-                    {% include 'packages/package.html' %}
-                {% empty %}
-                    No packages match the query "{{ query }}".
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>
-                You must provide a search query to get search results.
-            </p>
-        {% endif %}
-    </article>
+<article class="container">
+    {% if query %}
+        <ul>
+            {% for item in results %}
+                {% include 'packages/package.html' %}
+            {% empty %}
+                No packages match the query "{{ query }}".
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            You must provide a search query to get search results.
+        </p>
+    {% endif %}
+</article>
 {% endblock %}

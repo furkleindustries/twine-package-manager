@@ -9,7 +9,7 @@ urlpatterns = [
     re_path(r'^search/?$', views.SearchView.as_view(), name='search'),
     re_path(r'^keywords/(?P<keyword>[^\s/]+)/?$', views.KeywordView.as_view(),
             name='keywords'),
-    re_path(r'^(?P<unique_field>[^/]+)/?$', views.DetailView.as_view(),
+    re_path(r'^(?P<field>[^/]+)/?$', views.DetailView.as_view(),
             name='detail'),
     re_path(r'^(?P<unique_field>[^/]+)/edit/?$', views.UpdateView.as_view(),
             name='edit'),
