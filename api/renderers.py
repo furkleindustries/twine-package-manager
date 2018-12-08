@@ -8,7 +8,11 @@ class ContextAwareTemplateHTMLRenderer(TemplateHTMLRenderer):
             data['status_code'] = response.status_code
             return data
         else:
-            context = data
+            context = {}
+            if 'results' in data:
+                context = data
+            else:
+                context['item'] = data
 
             # pop keys which we do not need in the template
             keys_to_delete = ['request', 'response', 'args', 'kwargs']

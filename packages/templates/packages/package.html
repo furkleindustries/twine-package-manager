@@ -5,13 +5,13 @@
     <h1 class="package-title">
     {% endif %}
         {% if package_links %}
-            {% if package.owner == request.user %}
-                <a href="/packages/{{ package.name }}/edit">{{ package.name }}</a>
+            {% if item.owner == request.user %}
+                <a href="/packages/{{ item.name }}/edit">{{ item.name }}</a>
             {% else %}
-                <a href="/packages/{{ package.name }}">{{ package.name }}</a>
+                <a href="/packages/{{ item.name }}">{{ item.name }}</a>
             {% endif %}
         {% else %}
-            {{ package.name }}
+            {{ item.name }}
         {% endif %}
     {% if as_list %}
     </h4>
@@ -19,11 +19,11 @@
     </h1>
     {% endif %}
 
-    {% if request.user == package.owner %}
-    <a href="/packages/{{ package.name }}/edit/">Edit this package</a>
+    {% if request.user == item.owner %}
+    <a href="/packages/{{ item.name }}/edit/">Edit this package</a>
     {% endif %}
 
-    {% if package.author and show_author %}
+    {% if item.author and show_author %}
         <div>
             {% if show_labels %}
                 <h4>
@@ -35,13 +35,13 @@
 
             <p>
                 <a href="/profiles/{{ author.user_id }}">
-                    {{ package.author.username }}
+                    {{ item.author.username }}
                 </a>
             </p>
         </div>
     {% endif %}
 
-    {% if package.owner %}
+    {% if item.owner %}
         <div>
             {% if show_labels %}
                 <h4>
@@ -57,13 +57,13 @@
                 {% endif %}
 
                 <a href="/profiles/{{ owner.id }}">
-                    {{ package.owner.username }}
+                    {{ item.owner.username }}
                 </a>
             </p>
         </div>
     {% endif %}
 
-    {% if package.description %}
+    {% if item.description %}
         <div>
             {% if show_labels %}
                 <h4>
@@ -74,12 +74,12 @@
             {% endif %}
 
             <p>
-                {{ package.description }}
+                {{ item.description }}
             </p>
         </div>
     {% endif %}
 
-    {% if downloads is not None and show_downloads %}
+    {% if item.downloads is not None and show_downloads %}
         <div>
             {% if show_labels %}
             <h4>
@@ -90,12 +90,12 @@
             {% endif %}
 
             <p>
-                {{ downloads }}
+                {{ item.downloads }}
             </p>
         </div>
     {% endif %}
 
-    {% if package.keywords %}
+    {% if item.keywords %}
         <div>
             {% if show_labels %}
                 <h4>
@@ -105,7 +105,7 @@
                 </h4>
             {% endif %}
 
-            {% for keyword in package.keywords %}
+            {% for keyword in item.keywords %}
                 {% if keyword_links %}
                     <a
                         class="keyword keyword-link"
@@ -116,7 +116,7 @@
         </div>
     {% endif %}
 
-    {% if versions %}
+    {% if item.versions %}
         <div>
             <h4>
                 <em>
@@ -125,18 +125,18 @@
             </h4>
 
             <ul>
-                {% if default_version %}
+                {% if item.default_version %}
                     <li>
-                        <a href="/versions{{ default_version.id }}/">
+                        <a href="/versions{{ item.default_version.id }}/">
                             <strong>
-                                {{ default_version.semver_identifier }}
+                                {{ item.default_version.semver_identifier }}
                             </strong>
                         </a>
                     </li>
                 {% endif %}
 
-                {% for version in versions %}
-                    {% if version != default_version %}
+                {% for version in item.versions %}
+                    {% if version != item.default_version %}
                         <li>
                             <a href="/versions/{{ version.id }}/">
                                 {{ version.semver_identifier }}
@@ -146,7 +146,7 @@
                 {% endfor %}
             </ul>
         </div>
-    {% elif versions is not None %}
+    {% elif item.versions is not None %}
         <div>
             <p>
                 No versions created.

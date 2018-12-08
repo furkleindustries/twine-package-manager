@@ -6,8 +6,10 @@ from django.views import generic
 
 from api.renderers import ContextAwareTemplateHTMLRenderer
 from api.views import (
-    PackageListGetOnly,
+    PackageDetailGetOnly,
     PackageKeywordList,
+    PackageListGetOnly,
+    PackageSearch,
 )
 
 from packages.models import Package, PackageDownload
@@ -49,7 +51,6 @@ class IndexView(PackageListGetOnly):
 class KeywordView(PackageKeywordList):
     renderer_classes = (ContextAwareTemplateHTMLRenderer,)
     template_name = 'packages/keywords.html'
-    context_object_name = 'packages'
 
     def get_renderer_context(self):
         context = super().get_renderer_context()
@@ -57,71 +58,41 @@ class KeywordView(PackageKeywordList):
             'as_list': True,
             'keyword': self.kwargs.get('keyword') or '',
             'keyword_links': True,
+            'package_links': True,
+            'show_author': True,
         })
 
         return context
 
 
-class SearchView(generic.ListView):
+class SearchView(PackageSearch):
+    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
     template_name = 'packages/search.html'
-    context_object_name = 'packages'
 
-    def get_queryset(self):
-        packages = Package.objects.all()
-        search = self.request.GET.get('query')
-        if not search:
-            return []
-
-        search = search.strip()
-        if search == '*':
-            return packages
-
-        return packages_search_filter(search, packages)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
         context.update({
             'as_list': True,
             'keyword_links': True,
+            'package_links': True,
             'query': self.request.GET.get('query') or '',
+            'show_author': True,
         })
 
         return context
 
 
-class DetailView(generic.DetailView):
+class DetailView(PackageDetailGetOnly):
+    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
     template_name = 'packages/detail.html'
-    context_object_name = 'package'
 
-    def get_object(self):
-        unique_field = self.kwargs['unique_field']
-        if unique_field.isdigit():
-            return Package.objects.get(id=unique_field)
-
-        return Package.objects.get(name=unique_field)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        package = context['package']
-        downloads = package.packagedownload_set.count()
-        versions = package.version_set.all()
-        default_version = None
-        try:
-            default_version = versions.get(
-                parent_package=package,
-                is_default=True,
-            )
-        except Version.DoesNotExist:
-            pass
-
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
         context.update({
-            'package': package,
-            'default_version': default_version,
-            'downloads': downloads,
+            'keyword_links': True,
             'show_author': True,
             'show_labels': True,
             'show_downloads': True,
-            'versions': versions,
         })
 
         return context

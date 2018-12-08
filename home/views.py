@@ -27,9 +27,7 @@ class IndexView(generic.TemplateView):
         # length to 40 characters or less.
         downloaded = queryset.annotate(
             downloads=Count('packagedownload')
-        ).order_by(
-            '-downloads'
-        )[:10].values('name')
+        ).order_by('-downloads')[:10].values('name')
 
         # Get the names of the last ten published packages and restrict their
         # length to 40 characters or less.
