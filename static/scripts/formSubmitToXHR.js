@@ -36,25 +36,35 @@ function formSubmitToXHR(form) {
             }
         } else if (errorContainer) {
             var errKeys = Object.keys(responseObj);
-            for (var ii = 0; ii < errKeys.length; ii += 1) {
-                var errs = responseObj[errKeys[ii]];
-                var li = document.createElement('li');
-                var text = '';
-                if (errs && errs.length) {
-                    text = errKeys[ii] + ':\n';
-                    for (var jj = 0; jj < errs.length; jj += 1) {
-                        var err = responseObj[errKeys[ii]][jj];
-                        if (typeof err === 'string') {
-                            text += err + '\n';
-                        } else {
-                            text += JSON.stringify(err) + '\n';
+            if (errKeys.length) {
+                debugger;
+                for (var ii = 0; ii < errKeys.length; ii += 1) {
+                    var errs = responseObj[errKeys[ii]];
+                    var li = document.createElement('li');
+                    var pre = document.createElement('pre');
+                    var text = errKeys[ii] + ':\n';
+                    if (errs && errs.length) {
+                        for (var jj = 0; jj < errs.length; jj += 1) {
+                            var err = responseObj[errKeys[ii]][jj];
+                            if (typeof err === 'string') {
+                                text += err + '\n';
+                            } else {
+                                text += JSON.stringify(err) + '\n';
+                            }
                         }
+                    } else {
+                        text += JSON.stringify(errs) + '\n';
                     }
-                } else {
-                    text += JSON.stringify(errs) + '\n';
+    
+                    pre.textContent = text;
+                    li.appendChild(pre);
+                    errorContainer.appendChild(li);
                 }
-
-                li.textContent = text;
+            } else {
+                var li = document.createElement('li');
+                var pre = document.createElement('pre');
+                pre.textContent = 'Unknown error.';
+                li.appendChild(pre);
                 errorContainer.appendChild(li);
             }
 

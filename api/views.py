@@ -138,26 +138,46 @@ class PackageDetail(
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           PackageIsOwnerOrReadOnly)
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        package = self.get_object()
+
+        updated_data = request.data.copy()
+
+        serializer = self.get_serializer(package, data=updated_data,
+                                         partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return response.Response(serializer.data)
+
     def perform_update(self, serializer):
         package = self.get_object()
 
-        default_version = None
-        if serializer.validated_data.get('default_version'):
-            default_version = package.version_set.get(
-                semver_identifier=serializer.validated_data['default_version']
-            )
-
         keywords = split_keywords(serializer.validated_data['keywords'][0])
-        keywords = list(map(lambda x: x.lower(), keywords))
+        keywords = [x.lower() for x in keywords]
         serializer.validated_data['keywords'] = keywords
 
-        if default_version:
-            actual_version = Version.objects.get(
-                parent_package=package,
-                semver_identifier=default_version,
-            )
+        default_semver_id = self.request.data.get('default_version')
+        if default_semver_id:
+            default_version = None
+            try:
+                default_version = Version.objects.get(
+                    parent_package=package,
+                    semver_identifier=default_semver_id,
+                )
+            except Version.DoesNotExist:
+                pass
 
-            serializer.validated_data['default_version'] = actual_version
+            if default_version:
+                default_version.is_default = True
+                default_version.full_clean()
+                default_version.save()
+
+                # Set all other versions to not default.
+                Version.objects.filter(parent_package=package).exclude(
+                    id=default_version.id
+                ).update(is_default=False)
 
         super().perform_update(serializer)
 
@@ -170,10 +190,11 @@ class PackageCreateVersion(generics.CreateAPIView):
 
     def get_object(self):
         field = self.kwargs['field']
+        queryset = self.get_queryset()
         if field.isdigit():
-            return Package.objects.get(id=field)
+            return queryset.get(id=field)
         else:
-            return Package.objects.get(name=field)
+            return queryset.get(name=field)
 
     def perform_create(self, serializer):
         package = self.get_object()
@@ -192,6 +213,18 @@ class PackageCreateVersion(generics.CreateAPIView):
         if existing_version:
             raise Exception('There is already a version for this package ' +
                             'with the same semver identifier.')
+
+        serializer.validated_data['author'] = self.request.user
+        parent_package_id = serializer.validated_data['parent_package']
+
+        preexisting_versions = Version.objects.filter(parent_package=package)
+
+        already_default = preexisting_versions.filter(is_default=True)
+
+        # Set the version to default if it is the only version for the package
+        # or no other versions are set to default.
+        if not preexisting_versions.count() or not already_default.count():
+            serializer.validated_data['is_default'] = True
 
         super(PackageCreateVersion, self).perform_create(serializer)
 

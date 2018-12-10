@@ -40,13 +40,13 @@
                         name="default_version"
                     >
                         {% for version in versions %}
-                            <option {% if package.default_version == version %}selected{% endif %}>
+                            <option {% if version.is_default %}selected{% endif %}>
                                 {{ version.semver_identifier }}
                             </option>
                         {% endfor %}
                     </select>
                 {% else %}
-                    <span>{{ package.default_version.semver_identifier }}</span>
+                    <span>{{ versions.0.semver_identifier }}</span>
                 {% endif %}
             </div>
         {% endif %}

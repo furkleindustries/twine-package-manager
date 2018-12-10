@@ -17,13 +17,23 @@ class PackageSerializer(serializers.ModelSerializer):
 
     date_created = serializers.ReadOnlyField()
 
-    default_version = serializers.SerializerMethodField()
+    default_version = serializers.SerializerMethodField(read_only=True)
 
     def get_default_version(self, package):
+        request = self.context['request']
+        default_version_obj = None
         try:
-            return Version.objects.get(parent_package=package, is_default=True)
+            default_version_obj = Version.objects.get(
+                parent_package=package,
+                is_default=True,
+            )
         except Version.DoesNotExist:
             return None
+
+        if request.method == 'GET':
+            return default_version_obj
+        else:
+            return default_version_obj.semver_identifier
 
     versions = serializers.SerializerMethodField(read_only=True)
 
@@ -34,14 +44,13 @@ class PackageSerializer(serializers.ModelSerializer):
             include_versions = split(r'(?:,\s*)|\s+', include_versions)
             return [
                 VersionSerializer(x).data for x in Version.objects.filter(
-                    parent_package=package
+                    parent_package=package,
                 ) if x.semver_identifier in include_versions or (
                     'default' in include_versions and (
                         package.default_version == x
                     )
                 )
             ]
-
         else:
             return [x['semver_identifier'] for x in Version.objects.filter(
                 parent_package=package,
@@ -111,4 +120,4 @@ class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
         fields = ('id', 'semver_identifier', 'author', 'description', 'js',
-                  'css', 'parent_package', 'date_created')
+                  'css', 'parent_package', 'date_created', 'is_default',)
