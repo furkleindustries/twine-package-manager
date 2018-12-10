@@ -15,13 +15,14 @@
     <form
         class="version_create"
         method="POST"
-        action="/api/packages/{{ package.id }}/create_version/"
+        action="/api/packages/{{ package.name }}/create_version/"
         onsubmit="return formSubmitToXHR(document.querySelector('.version_create'));"
+        data-redirect-url="/packages/{{ package.name }}/edit/"
     >
         {% csrf_token %}
 
         <h3>
-            Create new version for {{ package.name|default:'Error: no name' }}
+            Create new version for "{{ package.name|default:'Error: no name' }}"
         </h3>
 
         <p>

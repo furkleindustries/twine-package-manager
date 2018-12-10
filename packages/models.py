@@ -16,7 +16,7 @@ class AutoDateTimeField(models.DateTimeField):
 
 
 class Package(models.Model):
-    name = models.CharField(max_length=100, unique=True, blank=False)
+    name = models.CharField(max_length=100, unique=True, blank=True)
     author = models.ForeignKey(
         User,
         null=True,

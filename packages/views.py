@@ -4,11 +4,10 @@ from urllib.parse import urlparse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
-from api.renderers import ContextAwareTemplateHTMLRenderer
 from api.views import (
-    PackageDetailGetOnly,
+    PackageDetailRetrieveOnly,
     PackageKeywordList,
-    PackageListGetOnly,
+    PackageListOnly,
     PackageSearch,
 )
 
@@ -18,10 +17,14 @@ from versions.models import Version
 
 from .forms import PackageCreateForm, PackageUpdateForm
 from .models import Package
+from .renderers import (
+    PackageAuthorAndOwnerAwareTemplateHTMLRenderer,
+    PackageOwnerAwareTemplateHTMLRenderer,
+)
 
 
-class IndexView(PackageListGetOnly):
-    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
+class IndexView(PackageListOnly):
+    renderer_classes = (PackageOwnerAwareTemplateHTMLRenderer,)
     template_name = 'packages/index.html'
 
     def get_renderer_context(self):
@@ -42,14 +45,14 @@ class IndexView(PackageListGetOnly):
             'ordering_direction': ordering_direction,
             'ordering_field': ordering_field,
             'package_links': True,
-            'show_author': True,
+            'show_owner': True,
         })
 
         return context
 
 
 class KeywordView(PackageKeywordList):
-    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
+    renderer_classes = (PackageOwnerAwareTemplateHTMLRenderer,)
     template_name = 'packages/keywords.html'
 
     def get_renderer_context(self):
@@ -66,7 +69,7 @@ class KeywordView(PackageKeywordList):
 
 
 class SearchView(PackageSearch):
-    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
+    renderer_classes = (PackageOwnerAwareTemplateHTMLRenderer,)
     template_name = 'packages/search.html'
 
     def get_renderer_context(self):
@@ -82,17 +85,19 @@ class SearchView(PackageSearch):
         return context
 
 
-class DetailView(PackageDetailGetOnly):
-    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
+class DetailView(PackageDetailRetrieveOnly):
+    renderer_classes = (PackageAuthorAndOwnerAwareTemplateHTMLRenderer,)
     template_name = 'packages/detail.html'
 
     def get_renderer_context(self):
         context = super().get_renderer_context()
+        print(self.request.user)
         context.update({
             'keyword_links': True,
             'show_author': True,
-            'show_labels': True,
             'show_downloads': True,
+            'show_labels': True,
+            'show_owner': True,
         })
 
         return context

@@ -11,9 +11,9 @@ from versions.models import Version
 class PackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
-        fields = ('id', 'name', 'author', 'owner', 'description',
+        fields = ('id', 'name', 'author', 'owner', 'description', 'homepage',
                   'default_version', 'keywords', 'tag', 'date_created',
-                  'date_modified', 'versions', 'downloads')
+                  'date_modified', 'versions', 'downloads',)
 
     date_created = serializers.ReadOnlyField()
 

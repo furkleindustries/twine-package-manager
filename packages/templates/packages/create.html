@@ -21,6 +21,7 @@
         method="POST"
         action="/api/packages/"
         onsubmit="return formSubmitToXHR(document.querySelector('.package_create'))"
+        data-redirect-url="/account/"
     >
         {% csrf_token %}
 

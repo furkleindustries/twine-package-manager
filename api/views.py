@@ -46,7 +46,7 @@ class PackageListMixin():
         )
 
 
-class PackageListGetOnly(PackageListMixin, generics.ListAPIView):
+class PackageListOnly(PackageListMixin, generics.ListAPIView):
     pass
 
 
@@ -57,6 +57,12 @@ class PackageList(
 ):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           PackageIsOwnerOrReadOnly)
+
+    def perform_create(self, serializer):
+        serializer.validated_data['author'] = self.request.user
+        serializer.validated_data['owner'] = self.request.user
+
+        super().perform_create(serializer)
 
 
 class PackageSearch(generics.ListAPIView):
@@ -118,7 +124,7 @@ class PackageDetailMixin():
         return super().finalize_response(request, response, *args, **kwargs)
 
 
-class PackageDetailGetOnly(
+class PackageDetailRetrieveOnly(
     PackageDetailMixin,
     generics.RetrieveAPIView,
 ):
@@ -153,7 +159,7 @@ class PackageDetail(
 
             serializer.validated_data['default_version'] = actual_version
 
-        super(PackageDetail, self).perform_update(serializer)
+        super().perform_update(serializer)
 
 
 class PackageCreateVersion(generics.CreateAPIView):
@@ -201,14 +207,21 @@ class ProfileList(generics.ListAPIView):
     ordering = ('-user_id',)
 
 
-class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+class ProfileDetailMixin():
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          ProfileIsOwnerOrReadOnly)
 
     def get_object(self):
         return Profile.objects.get(user_id=self.kwargs['user_id'])
+
+
+class ProfileDetailRetrieveOnly(ProfileDetailMixin, generics.RetrieveAPIView):
+    pass
+
+
+class ProfileDetail(ProfileDetailMixin, generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          ProfileIsOwnerOrReadOnly)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
