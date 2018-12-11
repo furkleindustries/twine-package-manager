@@ -2,7 +2,7 @@
     {% if as_list %}
     <h4 class="package-title">
     {% else %}
-    <h1 class="package-title">
+    <h2 class="package-title">
     {% endif %}
         {% if package_links %}
             {% if item.owner.user == request.user %}
@@ -16,7 +16,7 @@
     {% if as_list %}
     </h4>
     {% else %}
-    </h1>
+    </h2>
     {% endif %}
 
     {% if not as_list and item.owner.user == request.user %}

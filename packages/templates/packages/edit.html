@@ -16,7 +16,7 @@
 {% block content %}
 <script src="/static/scripts/formSubmitToXHR.js"></script>
 <article class="container">
-    <h1>Edit {{ package.name|default:'Error: no name' }} Package</h1>
+    <h2>Edit {{ package.name|default:'Error: no name' }} Package</h2>
 
     <form
         class="package_update"
@@ -53,16 +53,16 @@
 
         <input type="submit">
 
-        <ul class="error_container"></ul>
+        <ul class="error-container"></ul>
     </form>
-    
+
     <div>
         <div>
             <a href="/packages/{{ package.name }}/create_version/">
                 Create new version
             </a>
         </div>
-        
+
         {% if versions %}
             <ul>
                 {% for version in versions %}
@@ -74,9 +74,6 @@
                         >
                             {{ version.semver_identifier }}
                         </strong>
-
-                        <a href="/versions/{{ version.id }}/delete/"
-                        >Delete</a>
                     </li>
                 {% endfor %}
             </ul>

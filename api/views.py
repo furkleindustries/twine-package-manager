@@ -5,45 +5,41 @@ from django.forms.models import model_to_dict
 
 from rest_framework import filters, generics, permissions, response
 
-from api.serializers import (
-    PackageSerializer, ProfileSerializer, VersionSerializer
-)
 
 from .filters import PackageSearchFilter
+from .mixins import (
+    PackageListMixin,
+    PackageDetailMixin,
+    ProfileDetailMixin,
+    PackageExistsOrExistedAwareMixin,
+)
+
+from .pagination import (
+    PageSizeAwareCursorPagination,
+    PageSizeAwareOffsetPagination,
+)
+
+from .permissions import (
+    PackageIsOwnerOrReadOnly,
+    ProfileIsOwnerOrReadOnly,
+    VersionIsOwnerOrReadOnly,
+)
+
+from api.serializers import (
+    PackageSerializer,
+    ProfileSerializer,
+    VersionSerializer,
+)
+
 from packages.models import (
-    Package, DeletedPackage, PackageDownload, split_keywords
+    Package,
+    DeletedPackage,
+    PackageDownload,
+    split_keywords,
 )
 
 from profiles.models import Profile
 from versions.models import Version
-
-from .mixins import IntegrityErrorAwareMixin
-
-from .pagination import (
-    PageSizeAwareCursorPagination, PageSizeAwareOffsetPagination,
-)
-
-from .permissions import (
-    PackageIsOwnerOrReadOnly, ProfileIsOwnerOrReadOnly,
-    VersionIsOwnerOrReadOnly,
-)
-
-
-class PackageListMixin():
-    queryset = Package.objects.all()
-    serializer_class = PackageSerializer
-
-    pagination_class = PageSizeAwareOffsetPagination
-
-    filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('id', 'name', 'date_created', 'date_modified',
-                       'downloads',)
-    ordering = ('-downloads',)
-
-    def get_queryset(self):
-        return self.queryset.all().annotate(
-            downloads=Count('packagedownload')
-        )
 
 
 class PackageListOnly(PackageListMixin, generics.ListAPIView):
@@ -52,13 +48,24 @@ class PackageListOnly(PackageListMixin, generics.ListAPIView):
 
 class PackageList(
     PackageListMixin,
-    IntegrityErrorAwareMixin,
+    PackageExistsOrExistedAwareMixin,
     generics.ListCreateAPIView,
 ):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           PackageIsOwnerOrReadOnly)
 
     def perform_create(self, serializer):
+        package_name = serializer.validated_data['name']
+        deleted_package = None
+        try:
+            deleted_package = DeletedPackage.objects.get(name=package_name)
+        except DeletedPackage.DoesNotExist:
+            pass
+
+        if deleted_package:
+            raise Exception('There was already a package by this name, but ' +
+                            'it was deleted.')
+
         serializer.validated_data['author'] = self.request.user
         serializer.validated_data['owner'] = self.request.user
 
@@ -78,7 +85,7 @@ class PackageKeywordList(generics.ListAPIView):
     pagination_class = PageSizeAwareOffsetPagination
 
     filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ('id', 'name', 'date_modified', 'downloads',)
+    ordering_fields = ('date_created', 'name', 'date_modified', 'downloads',)
     ordering = ('-downloads',)
 
     def get_queryset(self):
@@ -87,41 +94,6 @@ class PackageKeywordList(generics.ListAPIView):
         ).annotate(
             downloads=Count('packagedownload')
         )
-
-
-class PackageDetailMixin():
-    queryset = Package.objects.all()
-    serializer_class = PackageSerializer
-
-    def get_object(self):
-        field = self.kwargs['field']
-        if field.isdigit():
-            return Package.objects.get(id=field)
-        else:
-            return Package.objects.get(name=field)
-
-    def finalize_response(self, request, response, *args, **kwargs):
-        if request.method == 'GET' and request.GET.get('include_versions'):
-            # Register downloads of each fetched version.
-            for version in response.data['versions']:
-                if version['parent_package']:
-                    parent_package = None
-                    try:
-                        parent_package = Package.objects.get(
-                            id=version['parent_package']
-                        )
-                    except Package.DoesNotExist:
-                        pass
-
-                    if parent_package:
-                        dl = PackageDownload.objects.create(
-                            package=parent_package
-                        )
-
-                        dl.full_clean()
-                        dl.save()
-
-        return super().finalize_response(request, response, *args, **kwargs)
 
 
 class PackageDetailRetrieveOnly(
@@ -176,10 +148,21 @@ class PackageDetail(
 
                 # Set all other versions to not default.
                 Version.objects.filter(parent_package=package).exclude(
-                    id=default_version.id
+                    id=default_version.id,
                 ).update(is_default=False)
 
         super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        deleted_package = DeletedPackage.objects.create(
+            name=instance.name,
+            previous_owner=self.request.user,
+        )
+
+        deleted_package.full_clean()
+        deleted_package.save()
+
+        super().perform_destroy(instance)
 
 
 class PackageCreateVersion(generics.CreateAPIView):
@@ -238,14 +221,6 @@ class ProfileList(generics.ListAPIView):
     filter_backends = (filters.OrderingFilter,)
     ordering_fields = ('user_id', 'name')
     ordering = ('-user_id',)
-
-
-class ProfileDetailMixin():
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-
-    def get_object(self):
-        return Profile.objects.get(user_id=self.kwargs['user_id'])
 
 
 class ProfileDetailRetrieveOnly(ProfileDetailMixin, generics.RetrieveAPIView):

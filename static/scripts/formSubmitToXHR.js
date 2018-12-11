@@ -2,7 +2,7 @@ function formSubmitToXHR(form) {
     var csrfTokenInput = form.querySelector('[name=csrfmiddlewaretoken]');
     var csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
 
-    var errorContainer = form.querySelector('.error_container');
+    var errorContainer = form.querySelector('.error-container');
 
     var method = (form.attributes.method || {}).value;
     if (!method) {
@@ -37,7 +37,6 @@ function formSubmitToXHR(form) {
         } else if (errorContainer) {
             var errKeys = Object.keys(responseObj);
             if (errKeys.length) {
-                debugger;
                 for (var ii = 0; ii < errKeys.length; ii += 1) {
                     var errs = responseObj[errKeys[ii]];
                     var li = document.createElement('li');

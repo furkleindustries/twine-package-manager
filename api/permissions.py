@@ -10,7 +10,7 @@ class PackageIsOwnerOrReadOnly(permissions.BasePermission):
             return True
 
         # Write permissions are only allowed to the owner of the package.
-        return package == request.user
+        return package.owner == request.user
 
 
 class ProfileIsOwnerOrReadOnly(permissions.BasePermission):
