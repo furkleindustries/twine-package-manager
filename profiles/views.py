@@ -1,19 +1,18 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render
 from django.views import generic
 
-from packages.models import Package
 from .models import Profile
 
+from api.renderers import ContextAwareTemplateHTMLRenderer
+from api.views import ProfileDetailRetrieveOnly
+from packages.models import Package
 
-class DetailView(generic.DetailView):
-    model = User
+
+class DetailView(ProfileDetailRetrieveOnly):
+    renderer_classes = (ContextAwareTemplateHTMLRenderer,)
     template_name = 'profiles/detail.html'
-    context_object_name = 'user'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
 
         user = context.get('user')
 

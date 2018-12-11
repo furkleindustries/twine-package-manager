@@ -2,10 +2,10 @@
     {% if as_list %}
     <h4 class="package-title">
     {% else %}
-    <h1 class="package-title">
+    <h2 class="package-title">
     {% endif %}
         {% if package_links %}
-            {% if item.owner == request.user %}
+            {% if item.owner.user == request.user %}
                 <a href="/packages/{{ item.name }}/edit">{{ item.name }}</a>
             {% else %}
                 <a href="/packages/{{ item.name }}">{{ item.name }}</a>
@@ -16,11 +16,33 @@
     {% if as_list %}
     </h4>
     {% else %}
-    </h1>
+    </h2>
     {% endif %}
 
-    {% if request.user == item.owner %}
+    {% if not as_list and item.owner.user == request.user %}
     <a href="/packages/{{ item.name }}/edit/">Edit this package</a>
+    {% endif %}
+
+    {% if item.owner and show_owner %}
+        <div>
+            {% if show_labels %}
+                <h4>
+                    <em>
+                        Owner
+                    </em>
+                </h4>
+            {% endif %}
+
+            <p>
+                {% if not show_labels %}
+                    Owned by
+                {% endif %}
+
+                <a href="/profiles/{{ owner.id }}">
+                    {{ item.owner.user.username }}
+                </a>
+            </p>
+        </div>
     {% endif %}
 
     {% if item.author and show_author %}
@@ -35,29 +57,7 @@
 
             <p>
                 <a href="/profiles/{{ author.user_id }}">
-                    {{ item.author.username }}
-                </a>
-            </p>
-        </div>
-    {% endif %}
-
-    {% if item.owner %}
-        <div>
-            {% if show_labels %}
-                <h4>
-                    <em>
-                        Owner
-                    </em>
-                </h4>
-            {% endif %}
-
-            <p>
-                {% if not show_labels %}
-                    By
-                {% endif %}
-
-                <a href="/profiles/{{ owner.id }}">
-                    {{ item.owner.username }}
+                    {{ item.author.user.username }}
                 </a>
             </p>
         </div>

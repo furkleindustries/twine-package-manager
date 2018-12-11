@@ -9,12 +9,11 @@
 {% endblock %}
 
 {% block content %}
-<script src="/static/scripts/formSubmitToXHR.js"></script>
-<article>
-    <h1>
+<article class="container">
+    <h2>
         Edit {{ user.username }} profile
-    </h1>
-
+    </h2>
+    
     <form
         class="account_update"
         method="PUT"
@@ -22,94 +21,95 @@
         onsubmit="return formSubmitToXHR(document.querySelector('.account_update'))"
     >
         {% csrf_token %}
-
+        
         {{ account_form.as_p }}
         {{ profile_form.as_p }}
         
         <input type="submit" value="Update profile">
-
-        <ul class="error_container"></ul>
-    </form>
         
+        <ul class="error-container"></ul>
+    </form>
+    
     <div>
         <h4>
             <em>
                 Packages
             </em>
         </h4>
-
+        
         <ul>
             {% for package in packages %}
-                <li>
+            <li>
                     <strong>{{ package.name }}</strong>
-
+                    
                     <a
                         class="editPackage"
                         href="/packages/{{ package.name }}/edit/"
                     >Edit</a>
-
+                    
                     <a
-                        class="deletePackage"
+                    class="deletePackage"
                         href="/packages/{{ package.name }}/delete/"
-                    >Delete</a>
-                </li>
+                        >Delete</a>
+                    </li>
             {% empty %}
-                No packages yet!
+            No packages yet!
             {% endfor %}
         </ul>
-    </div>
 
-    <a href="/packages/create/">
-        Create new package
-    </a>
+        <a href="/packages/create/">
+            Create new package
+        </a>
+    </div>
+    
 
     <div>
         <a href="/account/changePassword/">Change password</a>
     </div>
-
+    
     <div>
         <h4>
             <em>
                 Date created
             </em>
         </h4>
-
+        
         <time>
             {% if profile.time_style == '24H' %}
-                {% if profile.date_style == 'DDMM' %}
-                    {{ user.date_joined|date:'d N Y, G:i' }}
-                {% else %}
-                    {{ user.date_joined|date:'N d Y, G:i' }}
-                {% endif %}
+            {% if profile.date_style == 'DDMM' %}
+            {{ user.date_joined|date:'d N Y, G:i' }}
             {% else %}
-                {% if profile.date_style == 'DDMM' %}
-                    {{ user.date_joined|date:'d N Y, g:i a' }}
-                {% else %}
+                    {{ user.date_joined|date:'N d Y, G:i' }}
+                    {% endif %}
+            {% else %}
+            {% if profile.date_style == 'DDMM' %}
+            {{ user.date_joined|date:'d N Y, g:i a' }}
+            {% else %}
                     {{ user.date_joined|date:'N d Y, g:i a' }}
-                {% endif %}
-            {% endif %}
-        </time>
+                    {% endif %}
+                    {% endif %}
+                </time>
     </div>
-
+    
     <div>
         <h4>
             <em>
                 Last logged in
             </em>
         </h4>
-
+        
         <time>
             {% if profile.time_style == '24H' %}
-                {% if profile.date_style == 'DDMM' %}
-                    {{ user.last_login|date:'d N Y, G:i' }}
-                {% else %}
-                    {{ user.last_login|date:'N d Y, G:i' }}
-                {% endif %}
+            {% if profile.date_style == 'DDMM' %}
+            {{ user.last_login|date:'d N Y, G:i' }}
             {% else %}
-                {% if profile.date_style == 'DDMM' %}
+            {{ user.last_login|date:'N d Y, G:i' }}
+            {% endif %}
+            {% else %}
+            {% if profile.date_style == 'DDMM' %}
                     {{ user.last_login|date:'d N Y, g:i a' }}
                 {% else %}
-                    {{ user.last_login|date:'N d Y, g:i a' }}
+                {{ user.last_login|date:'N d Y, g:i a' }}
                 {% endif %}
             {% endif %}
         </time>
@@ -117,4 +117,5 @@
 </article>
 
 <script src="/static/scripts/editOnBeforeUnloadHandler.js" async defer></Script>
+<script src="/static/scripts/formSubmitToXHR.js" async defer></script>
 {% endblock %}

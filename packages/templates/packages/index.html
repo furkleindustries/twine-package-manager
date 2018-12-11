@@ -10,7 +10,8 @@
 
 {% block content %}
 <article class="container">
-    <h1>Packages</h1>
+    <h2>Packages</h2>
+
     <h5>
         <a href="/packages/create/">Create new package</a>
     </h5>
@@ -24,16 +25,16 @@
             Downloads
         </option>
 
-        <option value="id"{% if ordering_field == 'id' %} selected{% endif %}>
-            ID
-        </option>
-
         <option value="date_modified"{% if ordering_field == 'date_modified' %} selected{% endif %}>
             Date last modified
         </option>
 
         <option value="date_created"{% if ordering_field == 'date_created' %} selected{% endif %}>
             Date created
+        </option>
+
+        <option value="name"{% if ordering_field == 'name' %} selected{% endif %}>
+            Name
         </option>
     </select>
 
@@ -72,23 +73,5 @@
     {% endif %}
 </article>
 
-<script>
-(function () {
-    var orderingField = document.querySelector('.packages-ordering-field');
-    var orderingDirection = document.querySelector('.packages-ordering-direction');
-    var updateButton = document.querySelector('.packages-update');
-    var offset = (location.href.match(/\/[^/]+(offset=\d+)/) || [])[1];
-    updateButton.addEventListener('click', function () {
-        var direction = orderingDirection.value === 'ascending' ? '' : '-'; 
-        var pathname = '/packages/?' +
-            'ordering=' + direction + orderingField.value;
-
-        if (offset) {
-            pathname += '&' + offset;
-        }
-
-        location.href = pathname;
-    });
-})();
-</script>
+<script src="/static/scripts/packages/filterWidget.js" async defer></script>
 {% endblock %}

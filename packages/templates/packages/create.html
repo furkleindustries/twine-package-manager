@@ -12,15 +12,14 @@
 <script src="/static/scripts/formSubmitToXHR.js" async defer></script>
 
 <article class="container">
-    <h1>
-        Create a new package
-    </h1>
+    <h2>Create a new package</h2>
 
     <form
         class="package_create"
         method="POST"
         action="/api/packages/"
         onsubmit="return formSubmitToXHR(document.querySelector('.package_create'))"
+        data-redirect-url="/account/"
     >
         {% csrf_token %}
 
@@ -31,7 +30,7 @@
             value="Create package"
         >
 
-        <ul class="error_container"></ul>
+        <ul class="error-container"></ul>
     </form>
 </article>
 {% endblock %}

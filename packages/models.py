@@ -16,7 +16,7 @@ class AutoDateTimeField(models.DateTimeField):
 
 
 class Package(models.Model):
-    name = models.CharField(max_length=100, unique=True, blank=False)
+    name = models.CharField(max_length=100, unique=True, blank=True)
     author = models.ForeignKey(
         User,
         null=True,
@@ -39,8 +39,17 @@ class Package(models.Model):
 
 class DeletedPackage(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    owner_id = models.IntegerField(null=False)
+    previous_owner = models.ForeignKey(
+        User,
+        null=False,
+        default=None,
+        on_delete=models.CASCADE
+    )
+
     date_deleted = models.DateTimeField(default=timezone.now, editable=False)
+
+    def __str__(self):
+        return self.name
 
 
 class PackageDownload(models.Model):

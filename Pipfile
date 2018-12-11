@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 pylint = "*"
 pep8 = "*"
+rope = "*"
 
 [packages]
 django = "*"
