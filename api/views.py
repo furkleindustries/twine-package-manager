@@ -5,7 +5,6 @@ from django.forms.models import model_to_dict
 
 from rest_framework import filters, generics, permissions, response
 
-
 from .filters import PackageSearchFilter
 from .mixins import (
     PackageListMixin,
